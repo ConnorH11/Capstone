@@ -15,3 +15,5 @@ Decided on making a subnet calculator + started setting it up:
 ## 2025-04-17 2 hours
 - Made some new UI updates to make it a better experience.
 - Added an about page
+## 2025-04-18 2 hours
+- Added basic IPv4 and CIDR subnetting functionality.
