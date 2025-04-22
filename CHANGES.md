@@ -17,3 +17,5 @@ Decided on making a subnet calculator + started setting it up:
 - Added an about page
 ## 2025-04-18 2 hours
 - Added basic IPv4 and CIDR subnetting functionality.
+## 2025-04-22 2 hours
+- Added VLSM functionality.

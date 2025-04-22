@@ -1,9 +1,89 @@
 ﻿@page
-@model SubnetCalc.Pages.VLSMModel
+@model VLSMModel
 @{
-    ViewData["Title"] = "VLSM";
+    ViewData["Title"] = "VLSM Calculator";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>This is a tool to do Variable Length Subnet Masks. You can use this by inputting an IP and the CIDR as well as how many subnets you will need. Add the number of hosts for each specific subnet and click generate. It will output the hosts available, unused hosts, network address, CIDR, subnet mask, useable range, and the broadcast address. </p>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">VLSM Calculator</h2>
 
+    <form method="post">
+        <div class="form-group mb-3">
+            <label for="BaseNetwork">Base IP Address:</label>
+            <input type="text" class="form-control" id="BaseNetwork" name="BaseNetwork" placeholder="e.g., 192.168.0.0" value="@Model.BaseNetwork">
+        </div>
+
+        <h5>Subnets</h5>
+
+        @for (int i = 0; i < Model.HostsPerSubnet.Count; i++)
+        {
+            <div class="input-group mb-3">
+                <span class="input-group-text">Subnet @(i + 1)</span>
+                <input type="text" class="form-control" name="SubnetLabels[@i]" placeholder="Label (optional)" value="@(Model.SubnetLabels[i])" />
+                <input type="number" class="form-control" name="HostsPerSubnet[@i]" min="1" value="@Model.HostsPerSubnet[i]" placeholder="Required Hosts" />
+            </div>
+        }
+
+        <div class="d-flex gap-2 mb-3">
+            <button type="submit" name="AddSubnet" class="btn btn-secondary">+ Add Subnet</button>
+            <button type="submit" class="btn btn-primary">Calculate</button>
+        </div>
+    </form>
+
+
+    @section Scripts {
+        <script>
+            const hostsCheckbox = document.getElementById("EnableHosts");
+            const countCheckbox = document.getElementById("EnableCount");
+            const hostsSection = document.getElementById("hostsSection");
+            const countSection = document.getElementById("countSection");
+
+            function toggleSections() {
+                hostsSection.style.display = hostsCheckbox.checked ? "block" : "none";
+                countSection.style.display = countCheckbox.checked ? "block" : "none";
+            }
+
+            hostsCheckbox.addEventListener("change", toggleSections);
+            countCheckbox.addEventListener("change", toggleSections);
+            toggleSections();
+        </script>
+    }
+
+
+    @if (Model.Results?.Any() == true)
+    {
+        <h4 class="mt-5">Subnets</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Subnet</th>
+                    <th>Label</th>
+                    <th>Network Address</th>
+                    <th>CIDR</th>
+                    <th>Subnet Mask</th>
+                    <th>First Host</th>
+                    <th>Last Host</th>
+                    <th>Broadcast</th>
+                    <th>Usable Hosts</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Results.Count; i++)
+                {
+                    var subnet = Model.Results[i];
+                    <tr>
+                        <td>Subnet @(i + 1)</td>
+                        <td>@subnet.Label</td>
+                        <td>@subnet.NetworkAddress</td>
+                        <td>@subnet.CidrNotation</td>
+                        <td>@subnet.SubnetMask</td>
+                        <td>@subnet.FirstHost</td>
+                        <td>@subnet.LastHost</td>
+                        <td>@subnet.BroadcastAddress</td>
+                        <td>@subnet.HostCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

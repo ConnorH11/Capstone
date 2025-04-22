@@ -1,8 +1,51 @@
 ﻿@page
-@model IPSubnetModel
+@model SubnetModel
 @{
-    ViewData["Title"] = "IP Subnet";
+    ViewData["Title"] = "Subnet Calculator";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>This subnet calculator allows the user to input an IP address, subnet mask, and class. The calculator will output the network address, broadcast address, number of hosts, CIDR, etc.  </p>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Subnet Calculator</h2>
+
+    @if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+    </div>
+}
+
+    <form method="post" class="mb-4">
+        <div class="form-group mb-3">
+            <label for="ipAddress">IP Address:</label>
+            <input type="text" class="form-control" id="ipAddress" name="IpAddress" placeholder="192.168.1.0" value="@Model.IpAddress">
+        </div>
+        <div class="form-group mb-3">
+            <label for="cidrOrMask">CIDR or Subnet Mask:</label>
+            <input type="text" class="form-control" id="cidrOrMask" name="Cidr" placeholder="/24 or 255.255.255.0" value="@Model.Cidr">
+        </div>
+
+
+        <button type="submit" class="btn btn-primary">Calculate</button>
+    </form>
+
+    @if (Model.Results != null)
+    {
+        <div class="card shadow-sm p-4">
+            <h4>Results</h4>
+            <ul class="list-unstyled">
+                <li><strong>Network Address:</strong> @Model.Results.NetworkAddress</li>
+                <li><strong>Subnet Mask:</strong> @Model.Results.SubnetMask</li>
+                <li><strong>CIDR Notation:</strong> @Model.Results.CidrNotation</li>
+                <li><strong>Broadcast Address:</strong> @Model.Results.BroadcastAddress</li>
+                <li><strong>First Host:</strong> @Model.Results.FirstHost</li>
+                <li><strong>Last Host:</strong> @Model.Results.LastHost</li>
+                <li><strong>Number of Hosts:</strong> @Model.Results.HostCount</li>
+                <li><strong>Wildcard Mask:</strong> @Model.Results.WildcardMask</li>
+                <li><strong>Binary Subnet Mask:</strong> @Model.Results.BinaryMask</li>
+            </ul>
+        </div>
+    }
+</div>
