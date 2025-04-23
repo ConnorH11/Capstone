@@ -27,6 +27,10 @@
         <div class="d-flex gap-2 mb-3">
             <button type="submit" name="AddSubnet" class="btn btn-secondary">+ Add Subnet</button>
             <button type="submit" class="btn btn-primary">Calculate</button>
+            @if (Model.Results?.Any() == true)
+            {
+                <button type="submit" name="ExportCsv" class="btn btn-outline-success">Export CSV</button>
+            }
         </div>
     </form>
 
@@ -56,7 +60,6 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Subnet</th>
                     <th>Label</th>
                     <th>Network Address</th>
                     <th>CIDR</th>
@@ -72,7 +75,6 @@
                 {
                     var subnet = Model.Results[i];
                     <tr>
-                        <td>Subnet @(i + 1)</td>
                         <td>@subnet.Label</td>
                         <td>@subnet.NetworkAddress</td>
                         <td>@subnet.CidrNotation</td>

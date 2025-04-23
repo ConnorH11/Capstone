@@ -12,14 +12,19 @@ public static class VlsmCalculator
         var results = new List<SubnetResult>();
 
         // Pair labels with host requirements and sort by descending host size
-        var sorted = hostRequirements
+        var combined = hostRequirements
             .Select((hosts, index) => new
             {
+                OriginalIndex = index,
                 Hosts = hosts,
                 Label = labels[index]
             })
+            .ToList();
+
+        var sorted = combined
             .OrderByDescending(x => x.Hosts)
             .ToList();
+
 
         foreach (var entry in sorted)
         {

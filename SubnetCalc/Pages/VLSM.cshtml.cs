@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Text;
+
 
 namespace SubnetCalc.Pages
 {
@@ -22,25 +24,41 @@ namespace SubnetCalc.Pages
 
         public List<SubnetResult> Results { get; set; }
 
-        public void OnPost()
+        public IActionResult OnPost()
         {
+            if (Request.Form.ContainsKey("ExportCsv"))
+            {
+                var calculated = VlsmCalculator.Calculate(BaseNetwork, HostsPerSubnet, SubnetLabels);
+
+                var csv = new StringBuilder();
+                csv.AppendLine("Label,Network Address,CIDR,Subnet Mask,First Host,Last Host,Broadcast,Usable Hosts");
+
+                foreach (var subnet in calculated)
+                {
+                    csv.AppendLine($"{subnet.Label},{subnet.NetworkAddress},{subnet.CidrNotation},{subnet.SubnetMask},{subnet.FirstHost},{subnet.LastHost},{subnet.BroadcastAddress},{subnet.HostCount}");
+                }
+
+                var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+                return File(bytes, "text/csv", "subnet-results.csv");
+            }
+
             if (Request.Form.ContainsKey("AddSubnet"))
             {
                 HostsPerSubnet.Add(0);
                 SubnetLabels.Add("");
-                return;
+                return Page();
             }
 
             if (string.IsNullOrWhiteSpace(BaseNetwork))
             {
                 ModelState.AddModelError("", "Base network is required.");
-                return;
+                return Page();
             }
 
             if (HostsPerSubnet.Count == 0 || HostsPerSubnet.Any(h => h < 1))
             {
                 ModelState.AddModelError("", "Each subnet must have a valid host count.");
-                return;
+                return Page();
             }
 
             try
@@ -51,6 +69,8 @@ namespace SubnetCalc.Pages
             {
                 ModelState.AddModelError("", $"Error: {ex.Message}");
             }
+
+            return Page();
         }
 
     }

@@ -19,3 +19,7 @@ Decided on making a subnet calculator + started setting it up:
 - Added basic IPv4 and CIDR subnetting functionality.
 ## 2025-04-22 2 hours
 - Added VLSM functionality.
+## 2025-04-23 4 hours
+- Allowed VLSM results to up downloaded as a .csv file.
+- Supernetting functionality
+- Started working on the VLSM visualizer
