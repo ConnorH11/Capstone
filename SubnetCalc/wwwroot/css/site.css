@@ -20,3 +20,9 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.btn-outline-danger {
+    padding: 0.25rem 0.6rem;
+    border-radius: 50%;
+    line-height: 1;
+}

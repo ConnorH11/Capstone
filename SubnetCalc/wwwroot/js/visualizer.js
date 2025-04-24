@@ -68,7 +68,6 @@ function makeDraggable(el) {
 
     el.addEventListener('click', function () {
         if (deleteMode) {
-            // Remove connected lines
             for (let i = connections.length - 1; i >= 0; i--) {
                 if (connections[i].from === el || connections[i].to === el) {
                     connections[i].line.remove();
@@ -134,3 +133,19 @@ function updateLinePosition(fromEl, toEl, line) {
     line.setAttribute("x2", x2);
     line.setAttribute("y2", y2);
 }
+
+document.getElementById("addTextBtn").addEventListener("click", () => {
+    const textbox = document.createElement("div");
+    textbox.className = "custom-textbox";
+    textbox.contentEditable = true;
+    textbox.innerText = "Double-click to edit";
+
+    // Default position
+    textbox.style.left = "100px";
+    textbox.style.top = "100px";
+    textbox.style.position = "absolute";
+
+    canvas.appendChild(textbox);
+    makeDraggable(textbox);
+});
+

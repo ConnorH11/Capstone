@@ -3,28 +3,49 @@ using System.Net;
 
 public static class VlsmCalculator
 {
-    public static List<SubnetResult> Calculate(string baseIpStr, List<int> hostRequirements, List<string> labels)
+    public static List<SubnetResult> Calculate(string baseIpStr, string cidrOrMaskStr, List<int> hostRequirements, List<string> labels)
     {
         if (!IPAddress.TryParse(baseIpStr, out var baseIp))
             throw new ArgumentException("Invalid base IP address.");
 
+        int baseCidr;
+
+        if (cidrOrMaskStr.StartsWith("/"))
+        {
+            baseCidr = int.Parse(cidrOrMaskStr.TrimStart('/'));
+        }
+        else if (IPAddress.TryParse(cidrOrMaskStr, out var maskIp))
+        {
+            var bytes = maskIp.GetAddressBytes();
+            baseCidr = bytes.Sum(b => Convert.ToString(b, 2).Count(c => c == '1'));
+
+            var binary = string.Join("", bytes.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')));
+            if (binary.Contains("01"))
+                throw new ArgumentException("Subnet mask is not contiguous.");
+        }
+        else
+        {
+            throw new ArgumentException("Invalid CIDR or subnet mask.");
+        }
+
+        int totalAvailableHosts = baseCidr >= 31 ? 0 : (int)Math.Pow(2, 32 - baseCidr) - 2;
+        int totalRequestedHosts = hostRequirements.Sum();
+
+        if (totalRequestedHosts > totalAvailableHosts)
+            throw new InvalidOperationException("Not enough address space in base network to fulfill all subnets.");
+
         uint baseIpUint = IpToUint(baseIp);
         var results = new List<SubnetResult>();
 
-        // Pair labels with host requirements and sort by descending host size
-        var combined = hostRequirements
+        var sorted = hostRequirements
             .Select((hosts, index) => new
             {
                 OriginalIndex = index,
                 Hosts = hosts,
                 Label = labels[index]
             })
-            .ToList();
-
-        var sorted = combined
             .OrderByDescending(x => x.Hosts)
             .ToList();
-
 
         foreach (var entry in sorted)
         {
@@ -52,7 +73,9 @@ public static class VlsmCalculator
             baseIpUint += blockSize;
         }
 
-        return results;
+        return sorted
+            .Select(x => results[sorted.IndexOf(x)])
+            .ToList();
     }
 
     private static uint IpToUint(IPAddress ip)

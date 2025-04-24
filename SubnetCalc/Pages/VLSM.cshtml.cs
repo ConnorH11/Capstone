@@ -11,13 +11,16 @@ namespace SubnetCalc.Pages
         public string BaseNetwork { get; set; }
 
         [BindProperty]
-        public string InputMode { get; set; } = "hosts"; // "hosts" or "count"
+        public string BaseCidr { get; set; }
+
+        [BindProperty]
+        public string InputMode { get; set; } = "hosts";
 
         [BindProperty]
         public int SubnetCount { get; set; }
 
         [BindProperty]
-        public List<int> HostsPerSubnet { get; set; } = new();
+        public List<int?> HostsPerSubnet { get; set; } = new();
 
         [BindProperty]
         public List<string> SubnetLabels { get; set; } = new();
@@ -26,9 +29,27 @@ namespace SubnetCalc.Pages
 
         public IActionResult OnPost()
         {
+            if (Request.Form.ContainsKey("RemoveSubnet"))
+            {
+                int indexToRemove = int.Parse(Request.Form["RemoveSubnet"]);
+                if (indexToRemove >= 0 && indexToRemove < HostsPerSubnet.Count)
+                {
+                    HostsPerSubnet.RemoveAt(indexToRemove);
+                    SubnetLabels.RemoveAt(indexToRemove);
+                }
+                return Page();
+            }
+
+
             if (Request.Form.ContainsKey("ExportCsv"))
             {
-                var calculated = VlsmCalculator.Calculate(BaseNetwork, HostsPerSubnet, SubnetLabels);
+                if (string.IsNullOrWhiteSpace(BaseNetwork) || string.IsNullOrWhiteSpace(BaseCidr))
+                {
+                    ModelState.AddModelError("", "Base network and CIDR/subnet mask must be specified before exporting.");
+                    return Page();
+                }
+
+                var calculated = VlsmCalculator.Calculate(BaseNetwork, BaseCidr, HostsPerSubnet.Select(h => h ?? 0).ToList(), SubnetLabels);
 
                 var csv = new StringBuilder();
                 csv.AppendLine("Label,Network Address,CIDR,Subnet Mask,First Host,Last Host,Broadcast,Usable Hosts");
@@ -41,6 +62,7 @@ namespace SubnetCalc.Pages
                 var bytes = Encoding.UTF8.GetBytes(csv.ToString());
                 return File(bytes, "text/csv", "subnet-results.csv");
             }
+
 
             if (Request.Form.ContainsKey("AddSubnet"))
             {
@@ -63,7 +85,7 @@ namespace SubnetCalc.Pages
 
             try
             {
-                Results = VlsmCalculator.Calculate(BaseNetwork, HostsPerSubnet, SubnetLabels);
+                Results = VlsmCalculator.Calculate(BaseNetwork, BaseCidr, HostsPerSubnet.Select(h => h ?? 0).ToList(), SubnetLabels);
             }
             catch (Exception ex)
             {

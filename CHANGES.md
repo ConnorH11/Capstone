@@ -23,3 +23,8 @@ Decided on making a subnet calculator + started setting it up:
 - Allowed VLSM results to up downloaded as a .csv file.
 - Supernetting functionality
 - Started working on the VLSM visualizer
+## 2025-04-24 4 hours
+- Fixed up a VLSM error I had (Added a cidr input to specify subnet mask)
+- Added basic drag and drop functionality for the visualizer tool
+- Added connecting devices with cables
+- Added a notes function and delete button to it as well.

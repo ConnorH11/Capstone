@@ -8,30 +8,42 @@
     <h2 class="text-center mb-4">VLSM Calculator</h2>
 
     <form method="post">
-        <div class="form-group mb-3">
-            <label for="BaseNetwork">Base IP Address:</label>
-            <input type="text" class="form-control" id="BaseNetwork" name="BaseNetwork" placeholder="e.g., 192.168.0.0" value="@Model.BaseNetwork">
+        <div class="mb-3">
+            <label asp-for="BaseNetwork" class="form-label">Base Network IP</label>
+            <input asp-for="BaseNetwork" class="form-control" placeholder="e.g. 192.168.0.0" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="BaseCidr" class="form-label">CIDR or Subnet Mask</label>
+            <input asp-for="BaseCidr" class="form-control" placeholder="e.g. /24" />
         </div>
 
         <h5>Subnets</h5>
 
         @for (int i = 0; i < Model.HostsPerSubnet.Count; i++)
-        {
-            <div class="input-group mb-3">
-                <span class="input-group-text">Subnet @(i + 1)</span>
-                <input type="text" class="form-control" name="SubnetLabels[@i]" placeholder="Label (optional)" value="@(Model.SubnetLabels[i])" />
-                <input type="number" class="form-control" name="HostsPerSubnet[@i]" min="1" value="@Model.HostsPerSubnet[i]" placeholder="Required Hosts" />
-            </div>
-        }
+{
+        <div class="input-group mb-3 align-items-center">
+            <span class="input-group-text">Subnet @(i + 1)</span>
+            <input type="text" class="form-control" name="SubnetLabels[@i]" placeholder="Label (optional)" value="@(Model.SubnetLabels[i])" />
+            <input type="number" class="form-control" name="HostsPerSubnet[@i]"
+                   value="@(Model.HostsPerSubnet[i] == 0 ? "" : Model.HostsPerSubnet[i].ToString())"
+                   placeholder="Required Hosts" min="1" />
+            <button type="submit" name="RemoveSubnet" value="@i" class="btn btn-outline-danger ms-2" title="Remove Subnet">
+                <strong>&minus;</strong>
+            </button>
+        </div>
+}
 
-        <div class="d-flex gap-2 mb-3">
+        <!-- ✅ Now this is OUTSIDE the loop -->
+        <div class="d-flex gap-2 mb-4">
             <button type="submit" name="AddSubnet" class="btn btn-secondary">+ Add Subnet</button>
             <button type="submit" class="btn btn-primary">Calculate</button>
             @if (Model.Results?.Any() == true)
-            {
-                <button type="submit" name="ExportCsv" class="btn btn-outline-success">Export CSV</button>
-            }
+    {
+            <button type="submit" name="ExportCsv" class="btn btn-outline-success">Export CSV</button>
+    }
         </div>
+
     </form>
 
 
