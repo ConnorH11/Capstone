@@ -11,21 +11,39 @@
 
     <div class="mb-3">
         <label for="baseIp">Base Network IP:</label>
-        <input type="text" id="baseIp" class="form-control" placeholder="e.g. 192.168.0.0/24" />
-        <button id="calculateBtn" class="btn btn-primary mt-2">Calculate Subnets</button>
+        <input type="text" id="baseIp" class="form-control mb-3" placeholder="e.g. 192.168.0.0/24" />
+
+        <div class="d-flex align-items-center gap-3">
+            <button id="calculateBtn" class="btn btn-primary">Calculate Subnets</button>
+            <button id="deleteModeBtn" class="btn btn-danger">Delete Mode</button>
+            <span id="deleteStatus" class="text-danger fw-bold" style="display: none;">Delete Mode is Active</span>
+        </div>
     </div>
+
 
     <div class="d-flex">
         <div id="toolbox" class="me-3">
             <h5>Toolbox</h5>
             <img src="~/icons/router.svg" draggable="true" class="draggable" data-type="router" />
             <img src="~/icons/switch.svg" draggable="true" class="draggable" data-type="switch" />
-            <img src="~/icons/svg.png" draggable="true" class="draggable" data-type="pc" />
+            <img src="~/icons/pc.svg" draggable="true" class="draggable" data-type="pc" />
+            <img src="~/icons/cloud.svg" draggable="true" class="draggable" data-type="cloud" />
+            <img src="~/icons/firewall.svg" draggable="true" class="draggable" data-type="firewall" />
+            <img src="~/icons/laptop.svg" draggable="true" class="draggable" data-type="laptop" />
+            <img src="~/icons/L3switch.svg" draggable="true" class="draggable" data-type="L3Switch" />
+            <img src="~/icons/phone.svg" draggable="true" class="draggable" data-type="phone" />
+            <img src="~/icons/printer.svg" draggable="true" class="draggable" data-type="printer" />
+            <img src="~/icons/server.svg" draggable="true" class="draggable" data-type="server" />
         </div>
 
-        <div id="canvas" class="canvas-area"></div>
+        <div class="canvas-wrapper position-relative">
+            <svg id="connectionLayer" class="connection-layer"></svg>
+            <div id="canvas" class="canvas-area"></div>
+        </div>
     </div>
 </div>
+
+
 
 @section Scripts {
     <script src="~/js/visualizer.js"></script>
