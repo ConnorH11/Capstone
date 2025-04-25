@@ -62,19 +62,4 @@
         </div>
     }
 
-    @if (Model.Mode == "aggregate" && Model.AggregatedResults?.Any() == true)
-    {
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">CIDR Aggregated Blocks</h5>
-                <ul>
-                    @foreach (var cidr in Model.AggregatedResults)
-                    {
-                        <li>@cidr</li>
-                    }
-                </ul>
-            </div>
-        </div>
-    }
-
 </div>

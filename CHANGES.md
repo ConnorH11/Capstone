@@ -28,3 +28,6 @@ Decided on making a subnet calculator + started setting it up:
 - Added basic drag and drop functionality for the visualizer tool
 - Added connecting devices with cables
 - Added a notes function and delete button to it as well.
+## 2024-04-25 2 Hours
+- Worked on debugging some thigns to make the UI better.
+- Added an IPv6 subnetting page
