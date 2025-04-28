@@ -52,6 +52,17 @@
     z-index: 10;
 }
 
+.subnet-label {
+    background: #f0f8ff;
+    border: 1px solid #007bff;
+    padding: 5px;
+    border-radius: 8px;
+    font-size: 12px;
+    pointer-events: none; /* Prevents interfering with device dragging */
+    white-space: nowrap;
+}
+
+
 
 
 

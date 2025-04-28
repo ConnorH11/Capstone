@@ -13,11 +13,16 @@
         <label for="baseIp">Base Network IP:</label>
         <input type="text" id="baseIp" class="form-control mb-3" placeholder="e.g. 192.168.0.0/24" />
 
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2 mb-3">
             <button id="calculateBtn" class="btn btn-primary">Calculate Subnets</button>
+
             <button id="deleteModeBtn" class="btn btn-danger">Delete Mode</button>
-            <span id="deleteStatus" class="text-danger fw-bold" style="display: none;">Delete Mode is Active</span>
+            <span id="deleteStatus" class="text-danger ms-2" style="display:none;">Delete Mode Active</span>
+
+            <button id="cableModeBtn" class="btn btn-outline-primary">Cable Mode</button>
+            <span id="cableStatus" class="text-primary ms-2" style="display:none;">Cable Mode Active</span>
         </div>
+
     </div>
 
 
@@ -40,8 +45,8 @@
         </div>
 
         <div class="canvas-wrapper position-relative">
-            <svg id="connectionLayer" class="connection-layer"></svg>
             <div id="canvas" class="canvas-area"></div>
+            <svg id="connectionLayer" class="connection-layer"></svg>
         </div>
     </div>
 </div>
