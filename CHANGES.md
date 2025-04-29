@@ -1,11 +1,15 @@
 # Changelog
 
-## 2024-04-28 3.5 Hourse
+## 2025-04-29 4 hours
+- Troubleshooting the issue with the visualizer
+- This WILL be taking a while.
+
+## 2025-04-28 3.5 Hourse
 - Worked on the visualizer trying to get the calculation to work.
 - No luck but we made some progress
 - Added a cable button
 
-## 2024-04-25 2 hours
+## 2025-04-25 2 hours
 - Worked on debugging some things to make the UI better.
 - Added an IPv6 subnetting page
 
