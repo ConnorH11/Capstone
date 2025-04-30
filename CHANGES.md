@@ -1,5 +1,9 @@
 # Changelog
 
+## 2025-04-30 4 hours
+- Made some great progress on the visualizer (Should be done tomorrow)
+- Just need to troubleshoot some bugs I found and some calculation errors.
+
 ## 2025-04-29 4 hours
 - Troubleshooting the issue with the visualizer
 - This WILL be taking a while.

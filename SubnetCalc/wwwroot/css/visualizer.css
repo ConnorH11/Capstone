@@ -62,6 +62,10 @@
     white-space: nowrap;
 }
 
+#connectionLayer {
+    pointer-events: auto;
+}
+
 
 
 
