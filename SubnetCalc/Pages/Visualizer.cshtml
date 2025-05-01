@@ -21,6 +21,8 @@
 
             <button id="cableModeBtn" class="btn btn-outline-primary">Cable Mode</button>
             <span id="cableStatus" class="text-primary ms-2" style="display:none;">Cable Mode Active</span>
+
+            <button id="clearCanvasBtn" class="btn btn-outline-secondary">Clear Canvas</button>
         </div>
 
     </div>
@@ -69,7 +71,7 @@
         <div class="canvas-wrapper position-relative" style="position: relative;">
             <svg id="connectionLayer"
                  style="position:absolute; top:0; left:0; width:100%; height:100%;
-                z-index:1; pointer-events:auto;"></svg>
+                z-index:2; pointer-events:auto;"></svg>
             <div id="canvas" class="canvas-area" style="position:relative; z-index:2;"></div>
         </div>
 

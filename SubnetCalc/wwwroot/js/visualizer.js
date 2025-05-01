@@ -18,6 +18,37 @@ document.getElementById("deleteModeBtn").addEventListener("click", () => {
     cableStatus.style.display = "none";
 });
 
+document.getElementById("clearCanvasBtn").addEventListener("click", () => {
+    // Remove all devices, labels, IPs
+    Object.values(devices).forEach(device => {
+        if (device.element) device.element.remove();
+        if (device.labelElement) device.labelElement.remove();
+        if (device.ipAddressElement) device.ipAddressElement.remove();
+    });
+
+    // Clear all SVG lines (cables)
+    const svg = document.getElementById("connectionLayer");
+    while (svg.firstChild) {
+        svg.removeChild(svg.firstChild);
+    }
+
+    // Remove subnet outlines (extra divs with border)
+    document.querySelectorAll("#canvas > div").forEach(div => {
+        if (div.style.border?.includes("solid")) div.remove();
+    });
+
+    // Reset state
+    Object.keys(devices).forEach(k => delete devices[k]);
+    connections.length = 0;
+    deviceCounter = 0;
+    subnetResults.length = 0;
+
+    // Clear results table
+    document.getElementById("resultsBody").innerHTML = "";
+    document.getElementById("subnetResults").style.display = "none";
+});
+
+
 document.querySelectorAll('.draggable').forEach(icon => {
     icon.addEventListener('dragstart', e => {
         e.dataTransfer.setData('type', icon.dataset.type);
@@ -28,6 +59,9 @@ document.querySelectorAll('.draggable').forEach(icon => {
 canvas.addEventListener('dragover', e => e.preventDefault());
 
 function makeDraggable(el, label, device = null) {
+    if (el.dataset.draggableInitialized) return;
+    el.dataset.draggableInitialized = "true";
+
     let offsetX = 0, offsetY = 0;
 
     el.onmousedown = function (e) {
@@ -136,34 +170,39 @@ function drawSvgLine(fromEl, toEl) {
     const svg = document.getElementById("connectionLayer");
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
 
-    line.setAttribute("x1", "0"); // temp, will be updated
-    line.setAttribute("y1", "0");
-    line.setAttribute("x2", "0");
-    line.setAttribute("y2", "0");
+    // Set initial attributes
     line.setAttribute("stroke", "#007bff");
     line.setAttribute("stroke-width", "2");
-    line.setAttribute("pointer-events", "stroke");
+    line.setAttribute("pointer-events", "stroke"); // Enables click events on line itself
     line.style.cursor = "pointer";
 
-    // Add click-to-delete support
+    // Set position
+    updateLinePosition(fromEl, toEl, line);
+
+    // Make the line clickable for deletion
     line.addEventListener("click", function (e) {
         if (deleteMode) {
             svg.removeChild(line);
+
             for (let i = connections.length - 1; i >= 0; i--) {
                 if (connections[i].line === line) {
                     connections.splice(i, 1);
                     break;
                 }
             }
-            e.stopPropagation(); // Prevent click from bubbling
+
+            e.stopPropagation();
         }
     });
 
-    svg.appendChild(line);
-    updateLinePosition(fromEl, toEl, line);
 
+    // Append to SVG
+    svg.appendChild(line);
+
+    // Track connection
     const fromId = fromEl.dataset.id;
     const toId = toEl.dataset.id;
+
     if (devices[fromId] && devices[toId]) {
         devices[fromId].connections.push(toId);
         devices[toId].connections.push(fromId);
@@ -171,6 +210,7 @@ function drawSvgLine(fromEl, toEl) {
 
     connections.push({ from: fromEl, to: toEl, line: line });
 }
+
 
 
 function ipToUint(ipStr) {
@@ -307,37 +347,63 @@ function getRandomColor() {
 
 function getSubnetsFromRouterInterfaces() {
     const subnets = [];
+    const visitedPairs = new Set();
 
     Object.values(devices).forEach(device => {
-        if (device.type.toLowerCase() === 'router') {
-            device.connections.forEach(peerId => {
-                // Each router interface (connection) defines a subnet
-                const network = [device.id, peerId];
+        if (device.type.toLowerCase() !== 'router') return;
 
-                // Expand the subnet to include downstream non-router devices (e.g., through a switch)
-                const visited = new Set(network);
-                const queue = [...network];
+        device.connections.forEach(peerId => {
+            const peer = devices[peerId];
+            if (!peer || peer.type.toLowerCase() !== 'router') return;
 
-                while (queue.length > 0) {
-                    const currentId = queue.shift();
-                    const current = devices[currentId];
-                    if (!current || current.type.toLowerCase() === 'router') continue;
+            // Create a unique pair key like "device_1-device_2" or "device_2-device_1"
+            const pairKey = [device.id, peerId].sort().join('-');
+            if (visitedPairs.has(pairKey)) return;
 
-                    current.connections.forEach(nextId => {
-                        if (!visited.has(nextId)) {
-                            visited.add(nextId);
-                            queue.push(nextId);
-                        }
-                    });
-                }
+            visitedPairs.add(pairKey);
+            subnets.push([device.id, peerId]);
+        });
+    });
 
-                subnets.push(Array.from(visited));
-            });
-        }
+    // Now handle router-to-non-router subnet groups
+    Object.values(devices).forEach(device => {
+        if (device.type.toLowerCase() !== 'router') return;
+
+        device.connections.forEach(peerId => {
+            const peer = devices[peerId];
+            if (!peer || peer.type.toLowerCase() === 'router') return;
+
+            // Build a subnet group: router + downstream devices
+            const group = [device.id];
+            const visited = new Set([device.id]);
+            const queue = [peerId];
+
+            while (queue.length > 0) {
+                const currentId = queue.shift();
+                if (visited.has(currentId)) continue;
+                visited.add(currentId);
+                group.push(currentId);
+
+                const current = devices[currentId];
+                if (!current || current.type.toLowerCase() === 'router') continue;
+
+                current.connections.forEach(next => {
+                    if (!visited.has(next)) queue.push(next);
+                });
+            }
+
+            // Avoid adding a duplicate group
+            const alreadyExists = subnets.some(existing =>
+                existing.length === group.length &&
+                group.every(id => existing.includes(id))
+            );
+            if (!alreadyExists) subnets.push(group);
+        });
     });
 
     return subnets;
 }
+
 
 
 document.getElementById("calculateBtn").addEventListener("click", () => {
@@ -421,22 +487,27 @@ document.getElementById("calculateBtn").addEventListener("click", () => {
                     device.ipAddressElement = document.createElement('div');
                     device.ipAddressElement.innerText = device.ipAddress;
                     device.ipAddressElement.style.position = 'absolute';
-                    device.ipAddressElement.addEventListener('click', () => {
-                        if (deleteMode) device.ipAddressElement.remove();
-                    });
+
+                    //INSERT THIS BLOCK HERE
                     device.ipAddressElement.style.left = device.element.style.left;
-                    device.ipAddressElement.style.top = (parseInt(device.element.style.top) + 75) + 'px';
+                    device.ipAddressElement.style.top = (parseInt(device.element.style.top) + 85) + 'px';
                     device.ipAddressElement.style.fontSize = '10px';
                     device.ipAddressElement.style.color = '#000';
+                    device.ipAddressElement.style.zIndex = "3";
+                    device.ipAddressElement.style.backgroundColor = "#fff";
+                    device.ipAddressElement.style.padding = "1px 4px";
+                    device.ipAddressElement.style.borderRadius = "4px";
+
                     canvas.appendChild(device.ipAddressElement);
                 } else {
                     device.ipAddressElement.innerText = device.ipAddress;
                     device.ipAddressElement.style.left = device.element.style.left;
-                    device.ipAddressElement.style.top = (parseInt(device.element.style.top) + 75) + 'px';
+                    device.ipAddressElement.style.top = (parseInt(device.element.style.top) + 85) + 'px';
                 }
             }
         }
     });
+
 });
 
 document.getElementById("exportCsvBtn").addEventListener("click", () => {
@@ -467,8 +538,12 @@ document.getElementById("addTextBtn").addEventListener("click", () => {
 
 canvas.addEventListener('drop', e => {
     e.preventDefault();
+
     const type = e.dataTransfer.getData('type');
     const icon = e.dataTransfer.getData('icon');
+
+    // If there's no icon or type, it's a drag *within* canvas, so skip
+    if (!type || !icon) return;
 
     const node = document.createElement('img');
     node.src = icon;
@@ -481,7 +556,6 @@ canvas.addEventListener('drop', e => {
     node.dataset.id = id;
     node.dataset.type = type;
 
-    // Create editable label
     const label = document.createElement('div');
     label.innerText = `${type} (${id})`;
     label.contentEditable = true;
@@ -492,7 +566,6 @@ canvas.addEventListener('drop', e => {
     label.style.fontSize = '10px';
     label.style.color = '#333';
 
-    // Allow label deletion in delete mode
     label.addEventListener('click', () => {
         if (deleteMode) label.remove();
     });
@@ -512,4 +585,5 @@ canvas.addEventListener('drop', e => {
 
     makeDraggable(node, label, devices[id]);
 });
+
 

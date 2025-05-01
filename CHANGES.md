@@ -1,5 +1,11 @@
 # Changelog
 
+## 2025-05-01 4 hours
+- Made some good adjustments to the visualizer and got it fully functional
+- Will probably fine tune it later but we will be moving on to IPv6 subnetting
+- Also added a tab logo as well as a taskbar logo for the tool.
+- Named it Subnet Suite
+
 ## 2025-04-30 4 hours
 - Made some great progress on the visualizer (Should be done tomorrow)
 - Just need to troubleshoot some bugs I found and some calculation errors.
