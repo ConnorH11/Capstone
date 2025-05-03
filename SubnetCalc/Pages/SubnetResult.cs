@@ -12,6 +12,9 @@
         public string BinaryMask { get; set; }
         public string CidrNotation { get; set; }
         public string Label { get; set; }
+        public string NetworkPortion { get; set; }
+        public string HostPortion { get; set; }
+
 
 
     }

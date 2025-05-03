@@ -26,3 +26,45 @@ body {
     border-radius: 50%;
     line-height: 1;
 }
+
+body.dark-mode {
+    background-color: #121212;
+    color: #f1f1f1;
+}
+
+.dark-mode .navbar,
+.dark-mode .footer,
+.dark-mode .card,
+.dark-mode .container {
+    background-color: #1f1f1f;
+    color: #ffffff;
+}
+
+.dark-mode .card {
+    border: 1px solid #333;
+}
+
+.dark-mode .btn-primary {
+    background-color: #0d6efd;
+}
+
+.dark-mode .form-control,
+.dark-mode .form-check-label {
+    background-color: #1e1e1e;
+    color: #fff;
+}
+
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+    border-color: #555;
+    color: #fff;
+}
+
+.dark-mode a {
+    color: #9ecbff;
+}
+
+body.dark-mode .navbar {
+    background-color: #1c1c1c !important;
+}

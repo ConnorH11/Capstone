@@ -1,0 +1,28 @@
+﻿@page
+@model IPv6Model
+
+@{
+    ViewData["Title"] = "IPv6 Calculator";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">IPv6 Subnet Calculator</h2>
+
+    <div class="mb-3">
+        <label for="ipv6Address" class="form-label">IPv6 Address with Prefix:</label>
+        <input type="text" class="form-control" id="ipv6Address" placeholder="e.g. 2001:db8::/64">
+    </div>
+
+    <div class="mb-3">
+        <label for="subnetCount" class="form-label">Number of Subnets to Create:</label>
+        <input type="number" class="form-control" id="subnetCount" placeholder="e.g. 4">
+    </div>
+
+    <button class="btn btn-primary mb-4" onclick="calculateIPv6()">Calculate</button>
+
+    <div id="result" class="mt-4"></div>
+</div>
+
+@section Scripts {
+    <script src="~/js/ipv6.js"></script>
+}

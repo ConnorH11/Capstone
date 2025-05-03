@@ -1,5 +1,16 @@
 # Changelog
 
+## 2025-05-03 7 Hours
+- Finished IPv6 Subnetting
+- Added Hex, dec, and binary conversion
+- Added a little more results to the basic subnetting functionality
+- Added a binary calculator for adding and subtracting binary
+- Started on dark mode function
+
+## 2025-05-02 2 hours
+- Worked a little bit on fixing a bug
+- Started on IPv6 Subnetting
+
 ## 2025-05-01 4 hours
 - Made some good adjustments to the visualizer and got it fully functional
 - Will probably fine tune it later but we will be moving on to IPv6 subnetting

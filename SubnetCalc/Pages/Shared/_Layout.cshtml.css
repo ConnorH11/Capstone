@@ -46,3 +46,27 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.dark-mode .card,
+.dark-mode .container,
+.dark-mode .form-control,
+.dark-mode .form-check-input,
+.dark-mode .btn {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+.dark-mode .btn-primary {
+    background-color: #3f51b5;
+    border-color: #3f51b5;
+}
+
+.dark-mode .form-control::placeholder {
+    color: #aaa;
+}
