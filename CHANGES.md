@@ -1,5 +1,9 @@
 # Changelog
 
+## 2025-05-05 4 Hours
+- Worked on fixing some bugs on the visualizer.
+- Tried to fix some dark mode bugs as well.
+
 ## 2025-05-03 7 Hours
 - Finished IPv6 Subnetting
 - Added Hex, dec, and binary conversion

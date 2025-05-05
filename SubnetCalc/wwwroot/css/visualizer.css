@@ -66,6 +66,16 @@
     pointer-events: auto;
 }
 
+.interface-ip-label {
+    position: absolute;
+    font-size: 10px;
+    background: #fff;
+    padding: 2px 4px;
+    border-radius: 4px;
+    z-index: 10;
+    color: #000;
+}
+
 
 
 

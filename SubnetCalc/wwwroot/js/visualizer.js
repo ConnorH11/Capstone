@@ -198,10 +198,44 @@ function drawSvgLine(fromEl, toEl) {
 
     // Append to SVG
     svg.appendChild(line);
-
-    // Track connection
     const fromId = fromEl.dataset.id;
     const toId = toEl.dataset.id;
+
+    const fromDevice = devices[fromId];
+    const toDevice = devices[toId];
+
+    const validTypes = ['router', 'L3switch'];
+    if (fromDevice && toDevice &&
+        validTypes.includes(fromDevice.type.toLowerCase()) &&
+        validTypes.includes(toDevice.type.toLowerCase())
+    ) {
+        const fromIp = fromDevice.interfaceIPs?.[toId];
+        const toIp = toDevice.interfaceIPs?.[fromId];
+
+        if (fromIp) {
+            const fromLabel = document.createElement('div');
+            fromLabel.innerText = fromIp;
+            fromLabel.className = "interface-ip-label";
+            canvas.appendChild(fromLabel);
+            positionLabelNearDevice(fromDevice.element, fromLabel, 'left');
+            fromDevice.interfaceLabels = fromDevice.interfaceLabels || {};
+            fromDevice.interfaceLabels[toId] = fromLabel;
+        }
+
+        if (toIp) {
+            const toLabel = document.createElement('div');
+            toLabel.innerText = toIp;
+            toLabel.className = "interface-ip-label";
+            canvas.appendChild(toLabel);
+            positionLabelNearDevice(toDevice.element, toLabel, 'right');
+            toDevice.interfaceLabels = toDevice.interfaceLabels || {};
+            toDevice.interfaceLabels[fromId] = toLabel;
+        }
+    }
+
+
+    // Track connection
+    
 
     if (devices[fromId] && devices[toId]) {
         devices[fromId].connections.push(toId);
@@ -211,6 +245,22 @@ function drawSvgLine(fromEl, toEl) {
     connections.push({ from: fromEl, to: toEl, line: line });
 }
 
+function positionLabelNearDevice(deviceEl, labelEl, side = 'left') {
+    const rect = deviceEl.getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2 - canvasRect.left;
+    const centerY = rect.top + rect.height / 2 - canvasRect.top;
+
+    labelEl.style.position = 'absolute';
+    labelEl.style.left = (side === 'left' ? centerX - 40 : centerX + 10) + 'px';
+    labelEl.style.top = (centerY - 30) + 'px';
+    labelEl.style.fontSize = '10px';
+    labelEl.style.background = '#fff';
+    labelEl.style.padding = '1px 4px';
+    labelEl.style.borderRadius = '4px';
+    labelEl.style.zIndex = '10';
+    labelEl.style.color = '#000';
+}
 
 
 function ipToUint(ipStr) {
@@ -255,6 +305,52 @@ function isValidIPAddress(ip) {
 function isValidCIDR(cidr) {
     const num = parseInt(cidr, 10);
     return !isNaN(num) && num >= 0 && num <= 32;
+}
+
+function assignIPAddresses(group, startIp, numAddresses) {
+    let currentIp = startIp;
+
+    group.forEach(deviceId => {
+        const device = devices[deviceId];
+        if (!device) return;
+
+        const type = device.type.toLowerCase();
+        if (type === 'switch') return;
+        if (!device.interfaceIPs) device.interfaceIPs = {};
+
+        if (type === 'router' || type === 'l3switch') {
+            device.connections.forEach(peerId => {
+                const peer = devices[peerId];
+                if (!peer) return;
+
+                const peerType = peer.type.toLowerCase();
+                const connectsToRouterOrL3 = peerType === 'router' || peerType === 'l3switch';
+
+                if (connectsToRouterOrL3) {
+                    if (!(peerId in device.interfaceIPs)) {
+                        device.interfaceIPs[peerId] = uintToIp(currentIp);
+                    }
+                    if (!peer.interfaceIPs) {
+                        peer.interfaceIPs = {};
+                    }
+                    if (!(device.id in peer.interfaceIPs)) {
+                        peer.interfaceIPs[device.id] = uintToIp(currentIp + 1);
+                    }
+                    currentIp += 2;
+                }
+
+
+
+            });
+        } else {
+            if (numAddresses > 0) {
+                device.ipAddress = uintToIp(currentIp++);
+                numAddresses--;
+            } else {
+                device.ipAddress = "N/A";
+            }
+        }
+    });
 }
 
 function autoSubnet(baseCidrStr, groups) {
@@ -312,29 +408,35 @@ function autoSubnet(baseCidrStr, groups) {
 
         // Assign IPs to devices within the subnet
         assignIPAddresses(group, nextIp + 1, blockSize - 2);
-
         nextIp += blockSize;
     });
 }
 
-function assignIPAddresses(group, startIp, numAddresses) {
-    let currentIp = startIp;
-    group.forEach(deviceId => {
-        const device = devices[deviceId];
-        if (device && device.type.toLowerCase() !== 'router') {
-            if (numAddresses > 0) {
-                device.ipAddress = uintToIp(currentIp);
-                currentIp++;
-                numAddresses--;
-            } else {
-                device.ipAddress = "N/A"; // Or handle this case as needed
-            }
-        } else if (device && device.type.toLowerCase() === 'router') {
-            device.ipAddress = uintToIp(currentIp); // Assign IP to router
-            currentIp++;
-        }
+function renderInterfaceLabels() {
+    Object.values(devices).forEach(device => {
+        const validTypes = ['router', 'l3switch'];
+        if (!validTypes.includes(device.type.toLowerCase())) return;
+
+        // Skip if no interface IPs are assigned
+        if (!device.interfaceIPs) return;
+
+        Object.entries(device.interfaceIPs).forEach(([peerId, ip]) => {
+            const existingLabel = device.interfaceLabels?.[peerId];
+            if (existingLabel) return; // Avoid duplicating
+
+            const label = document.createElement('div');
+            label.innerText = ip;
+            label.className = "interface-ip-label";
+            canvas.appendChild(label);
+            positionLabelNearDevice(device.element, label, 'left');
+
+            device.interfaceLabels = device.interfaceLabels || {};
+            device.interfaceLabels[peerId] = label;
+        });
     });
 }
+
+
 
 function getRandomColor() {
     const letters = '0123456789ABCDEF';
@@ -416,6 +518,7 @@ document.getElementById("calculateBtn").addEventListener("click", () => {
         return;
     }
     autoSubnet(base, groups);
+    renderInterfaceLabels();
 
     if (subnetResults.length === 0) return; // Stop if autoSubnet failed
 
