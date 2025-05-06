@@ -1,5 +1,9 @@
 # Changelog
 
+## 2025-05-06 4 Hours
+- Finished the visualizer enough for presentation
+- Continued debugging dark mode
+
 ## 2025-05-05 4 Hours
 - Worked on fixing some bugs on the visualizer.
 - Tried to fix some dark mode bugs as well.
