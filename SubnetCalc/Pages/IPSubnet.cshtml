@@ -6,13 +6,27 @@
 
 <div class="container mt-5">
     <h2 class="text-center mb-4">Subnet Calculator</h2>
+    <div class="calculator-help">
+        <button class="help-toggle" onclick="toggleHelp(this)">?</button>
+        <div class="help-text" style="display: none;">
+            <p><strong>What this calculator does:</strong></p>
+            <p>This tool helps you calculate subnet information based on the input IP and subnet mask.</p>
+            <p><strong>How to use:</strong></p>
+            <ul>
+                <li>Enter a valid IP address (i.e 192.168.1.1) and CIDR range or subnet mask (i.e /24 or 255.255.255.0).</li>
+                <li>Click "Calculate" to generate the subnet details.</li>
+                <li>View network address, broadcast, range, hosts, etc.</li>
+            </ul>
+        </div>
+    </div>
+
 
     @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger" role="alert">
         @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
         {
-            <div>@error.ErrorMessage</div>
+        <div>@error.ErrorMessage</div>
         }
     </div>
 }
@@ -33,21 +47,29 @@
 
     @if (Model.Results != null)
     {
-        <div class="card shadow-sm p-4">
-            <h4>Results</h4>
-            <ul class="list-unstyled">
-                <li><strong>Network Address:</strong> @Model.Results.NetworkAddress</li>
-                <li><strong>Subnet Mask:</strong> @Model.Results.SubnetMask</li>
-                <li><strong>CIDR Notation:</strong> @Model.Results.CidrNotation</li>
-                <li><strong>Broadcast Address:</strong> @Model.Results.BroadcastAddress</li>
-                <li><strong>First Host:</strong> @Model.Results.FirstHost</li>
-                <li><strong>Last Host:</strong> @Model.Results.LastHost</li>
-                <li><strong>Number of Hosts:</strong> @Model.Results.HostCount</li>
-                <li><strong>Wildcard Mask:</strong> @Model.Results.WildcardMask</li>
-                <li><strong>Binary Subnet Mask:</strong> @Model.Results.BinaryMask</li>
-                <li><strong>Network Portion:</strong> @Model.Results.NetworkPortion</li>
-                <li><strong>Host Portion:</strong> @Model.Results.HostPortion</li>
-            </ul>
-        </div>
+    <div class="card shadow-sm p-4">
+        <h4>Results</h4>
+        <ul class="list-unstyled">
+            <li><strong>Network Address:</strong> @Model.Results.NetworkAddress</li>
+            <li><strong>Subnet Mask:</strong> @Model.Results.SubnetMask</li>
+            <li><strong>CIDR Notation:</strong> @Model.Results.CidrNotation</li>
+            <li><strong>Broadcast Address:</strong> @Model.Results.BroadcastAddress</li>
+            <li><strong>First Host:</strong> @Model.Results.FirstHost</li>
+            <li><strong>Last Host:</strong> @Model.Results.LastHost</li>
+            <li><strong>Number of Hosts:</strong> @Model.Results.HostCount</li>
+            <li><strong>Wildcard Mask:</strong> @Model.Results.WildcardMask</li>
+            <li><strong>Binary Subnet Mask:</strong> @Model.Results.BinaryMask</li>
+            <li><strong>Network Portion:</strong> @Model.Results.NetworkPortion</li>
+            <li><strong>Host Portion:</strong> @Model.Results.HostPortion</li>
+        </ul>
+    </div>
     }
 </div>
+
+<script>
+    function toggleHelp(button) {
+        const helpBox = button.nextElementSibling;
+        helpBox.style.display = helpBox.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+

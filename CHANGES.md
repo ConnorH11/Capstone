@@ -1,5 +1,10 @@
 # Changelog
 
+## 2025-05-07 4 Hours
+- Added a donation button
+- Added complete dark mode functionality
+- Started working on a help system for each calculator
+
 ## 2025-05-06 4 Hours
 - Finished the visualizer enough for presentation
 - Continued debugging dark mode

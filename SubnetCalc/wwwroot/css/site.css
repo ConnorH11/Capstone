@@ -36,9 +36,8 @@ body.dark-mode {
     body.dark-mode .card {
         background-color: #2a2a2a;
         color: #ffffff;
-        box-shadow: 0 0 10px 2px white; /* subtle white glow */
+        box-shadow: 0 0 10px 2px white;
         border: none;
-        shadow-sm: white;
     }
 
     body.dark-mode .navbar {
@@ -87,3 +86,79 @@ body.dark-mode {
     body:not(.dark-mode) #logoDark {
     display: none;
     }
+
+    #darkModeToggle {
+    outline-color: #000;
+    color: #000;
+    border: 1px solid #333;
+    }
+
+    body.dark-mode #darkModeToggle {
+    outline-color: #FFF;
+    color: #FFF;
+    border: 1px solid #ccc;
+    }
+
+body.dark-mode table,
+body.dark-mode .table {
+    background-color: #2b2b2b;
+    color: #ffffff;
+    border-color: #444;
+}
+
+    body.dark-mode .table th,
+    body.dark-mode .table td {
+        border-color: #555;
+        color: #ddd;
+    }
+
+body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #333;
+}
+
+body.dark-mode .table-striped tbody tr:nth-of-type(even) {
+    background-color: #2b2b2b;
+}
+
+body.dark-mode .interface-ip-label,
+body.dark-mode .custom-textbox {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+body:not(.dark-mode) .bmc-btn-container .bmc-btn {
+    border: 2px solid #1e1e1e !important; /* Dark outline for light mode */
+    border-radius: 8px !important; /* Optional: match the button shape */
+}
+
+.help-toggle {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+    .help-toggle:hover {
+        background-color: #0056b3;
+    }
+
+.help-text {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-left: 4px solid #007bff;
+    font-size: 0.9em;
+    border-radius: 4px;
+}
+
+body.dark-mode .help-text {
+    background-color: #2a2a2a;
+    color: #f1f1f1;
+    border-left-color: #66aaff;
+}
