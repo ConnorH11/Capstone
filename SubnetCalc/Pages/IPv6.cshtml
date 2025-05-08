@@ -8,21 +8,46 @@
 <div class="container mt-4">
     <h2 class="text-center mb-4">IPv6 Subnet Calculator</h2>
 
-    <div class="mb-3">
-        <label for="ipv6Address" class="form-label">IPv6 Address with Prefix:</label>
-        <input type="text" class="form-control" id="ipv6Address" placeholder="e.g. 2001:db8::/64">
-    </div>
+    <form>
+        <div class="mb-3">
+            <label for="ipv6Address" class="form-label">IPv6 Address with Prefix:</label>
+            <input type="text" class="form-control" id="ipv6Address" placeholder="e.g. 2001:db8::/64">
+        </div>
 
-    <div class="mb-3">
-        <label for="subnetCount" class="form-label">Number of Subnets to Create:</label>
-        <input type="number" class="form-control" id="subnetCount" placeholder="e.g. 4">
-    </div>
+        <div class="mb-3">
+            <label for="subnetCount" class="form-label">Number of Subnets to Create:</label>
+            <input type="number" class="form-control" id="subnetCount" placeholder="e.g. 4">
+        </div>
 
-    <button class="btn btn-primary mb-4" onclick="calculateIPv6()">Calculate</button>
+        <div class="d-flex gap-2 mb-4">
+            <button type="button" class="btn btn-primary" onclick="calculateIPv6()">Calculate</button>
+            <button type="button" class="btn btn-primary ms-2" onclick="toggleHelp()">Need Help?</button>
+        </div>
+    </form>
+
+    <div class="ipv6-help alert alert-secondary" style="display: none;">
+        <p><strong>What this calculator does:</strong></p>
+        <p>
+            Splits a given IPv6 network (e.g. <code>2001:db8::/64</code>) into the number of equal-sized subnets you request.
+        </p>
+        <p><strong>How to use:</strong></p>
+        <ul>
+            <li>Enter your base IPv6 network with prefix (e.g. <code>2001:db8:abcd::/48</code>).</li>
+            <li>Specify how many subnets you need (e.g. <code>8</code> for eight /51 subnets).</li>
+            <li>Click “Calculate” to generate each subnet’s network address and new prefix.</li>
+            <li>Review the resulting list below.</li>
+        </ul>
+    </div>
 
     <div id="result" class="mt-4"></div>
 </div>
 
 @section Scripts {
+    <script>
+        function toggleHelp() {
+            const panel = document.querySelector('.ipv6-help');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
     <script src="~/js/ipv6.js"></script>
 }

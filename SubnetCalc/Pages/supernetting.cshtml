@@ -11,11 +11,19 @@
         <div class="form-group mb-3">
             <label>Calculation Mode:</label>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="Mode" value="supernet" checked="@(Model.Mode == "supernet")" />
+                <input class="form-check-input"
+                       type="radio"
+                       name="Mode"
+                       value="supernet"
+                       checked="@(Model.Mode == "supernet")" />
                 <label class="form-check-label">Single Supernet CIDR</label>
             </div>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="Mode" value="aggregate" checked="@(Model.Mode == "aggregate")" />
+                <input class="form-check-input"
+                       type="radio"
+                       name="Mode"
+                       value="aggregate"
+                       checked="@(Model.Mode == "aggregate")" />
                 <label class="form-check-label">CIDR Aggregation (Minimal Blocks)</label>
             </div>
         </div>
@@ -24,57 +32,94 @@
             <label>Enter Subnet CIDRs:</label>
             @for (int i = 0; i < Model.Subnets.Count; i++)
             {
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" name="Subnets[@i]" value="@Model.Subnets[i]" placeholder="e.g., 192.168.0.0/24" />
-                </div>
+            <div class="input-group mb-2">
+                <input type="text"
+                       class="form-control"
+                       name="Subnets[@i]"
+                       value="@Model.Subnets[i]"
+                       placeholder="e.g., 192.168.0.0/24" />
+            </div>
             }
-            <button type="submit" name="AddSubnet" class="btn btn-secondary mb-2">+ Add Subnet</button>
         </div>
 
-        <button type="submit" class="btn btn-primary">Calculate Supernet</button>
+        <div class="d-flex gap-2 mb-4">
+            <button type="submit" name="AddSubnet" class="btn btn-secondary">
+                + Add Subnet
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Calculate Supernet
+            </button>
+            <button type="button"
+                    class="btn btn-primary ms-2"
+                    onclick="toggleHelp()">
+                Need Help?
+            </button>
+        </div>
     </form>
 
+    <!-- Help panel -->
+    <div class="calculator-help alert alert-secondary" style="display:none;">
+        <p><strong>What this calculator does:</strong></p>
+        <p>
+            <em>Single Supernet CIDR</em> mode finds the smallest single CIDR block
+            that covers all of the subnets you enter.<br />
+            <em>CIDR Aggregation</em> mode merges your list into the minimal set
+            of non-overlapping CIDR prefixes.
+        </p>
+
+        <p><strong>How to use:</strong></p>
+        <ul>
+            <li>Select your calculation mode at the top.</li>
+            <li>Enter each existing subnet in CIDR format (e.g., <code>10.0.1.0/24</code>).</li>
+            <li>Click <strong>+ Add Subnet</strong> to add more lines or remove rows manually in your form post-handler.</li>
+            <li>Hit <strong>Calculate Supernet</strong>.</li>
+            <li>
+                In <strong>Supernet</strong> mode you’ll see the single enclosing CIDR,
+                its network address, mask, and host range.<br />
+                In <strong>Aggregate</strong> mode you’ll get a bullet-list of
+                the minimal aggregated CIDR blocks.
+            </li>
+            <li>Optionally integrate or export those results as needed.</li>
+        </ul>
+    </div>
+
+    @* Results for Aggregation *@
     @if (Model.Mode == "aggregate" && Model.AggregatedResults.Any())
     {
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">CIDR Aggregated Blocks</h5>
-                <ul>
-                    @foreach (var cidr in Model.AggregatedResults)
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">CIDR Aggregated Blocks</h5>
+            <ul>
+                @foreach (var cidr in Model.AggregatedResults)
                     {
-                        <li>@cidr</li>
+                <li>@cidr</li>
                     }
-                </ul>
-            </div>
+            </ul>
         </div>
+    </div>
     }
 
+    @* Results for Single Supernet *@
     @if (Model.Mode == "supernet" && Model.Result != null)
     {
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">Supernet Result</h5>
-                <p><strong>Supernet CIDR:</strong> @Model.Result.Cidr</p>
-                <p><strong>Network Address:</strong> @Model.Result.Network</p>
-                <p><strong>Subnet Mask:</strong> @Model.Result.Mask</p>
-                <p><strong>IP Range:</strong> @Model.Result.FirstHost - @Model.Result.LastHost</p>
-            </div>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Supernet Result</h5>
+            <p><strong>Supernet CIDR:</strong> @Model.Result.Cidr</p>
+            <p><strong>Network Address:</strong> @Model.Result.Network</p>
+            <p><strong>Subnet Mask:</strong> @Model.Result.Mask</p>
+            <p><strong>IP Range:</strong> @Model.Result.FirstHost - @Model.Result.LastHost</p>
         </div>
+    </div>
     }
-
-    @if (Model.Mode == "aggregate" && Model.AggregatedResults?.Any() == true)
-    {
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">CIDR Aggregated Blocks</h5>
-                <ul>
-                    @foreach (var cidr in Model.AggregatedResults)
-                    {
-                        <li>@cidr</li>
-                    }
-                </ul>
-            </div>
-        </div>
-    }
-
 </div>
+
+@section Scripts {
+    <script>
+        function toggleHelp() {
+            const panel = document.querySelector('.calculator-help');
+            if (!panel) return;
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+}

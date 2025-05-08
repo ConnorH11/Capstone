@@ -1,5 +1,8 @@
 # Changelog
 
+## 2025-05-08 4 Hours
+- Added help buttons to each calculator
+
 ## 2025-05-07 4 Hours
 - Added a donation button
 - Added complete dark mode functionality

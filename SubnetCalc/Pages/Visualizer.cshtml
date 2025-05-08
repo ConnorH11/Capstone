@@ -15,16 +15,33 @@
 
         <div class="d-flex align-items-center gap-2 mb-3">
             <button id="calculateBtn" class="btn btn-primary">Calculate Subnets</button>
-
             <button id="deleteModeBtn" class="btn btn-danger">Delete Mode</button>
             <span id="deleteStatus" class="text-danger ms-2" style="display:none;">Delete Mode Active</span>
-
             <button id="cableModeBtn" class="btn btn-outline-primary">Cable Mode</button>
             <span id="cableStatus" class="text-primary ms-2" style="display:none;">Cable Mode Active</span>
-
             <button id="clearCanvasBtn" class="btn btn-outline-secondary">Clear Canvas</button>
+            <!-- Help toggle -->
+            <button type="button" class="btn btn-primary ms-2" onclick="toggleHelp()">Need Help?</button>
         </div>
 
+        <!-- Help panel -->
+        <div class="visualizer-help alert alert-secondary" style="display: none;">
+            <p><strong>What this tool does:</strong></p>
+            <p>
+                The VLSM Visualizer lets you drag network devices onto a canvas, connect them with cables,
+                and then automatically divides your base network into subnets based on those connections.
+            </p>
+            <p><strong>How to use:</strong></p>
+            <ul>
+                <li>Enter your base network in CIDR form (e.g. 192.168.0.0/24).</li>
+                <li>Drag devices (routers, switches, PCs, etc.) from the toolbox onto the canvas.</li>
+                <li>Click “Cable Mode,” then click two devices to connect them.</li>
+                <li>Use “Delete Mode” to remove any devices or cables.</li>
+                <li>When ready, click “Calculate Subnets.”</li>
+                <li>View your subnets in the table and on the canvas (colored outlines and IP labels).</li>
+                <li>Export the results to CSV if needed.</li>
+            </ul>
+        </div>
     </div>
 
     <div id="subnetResults" class="mt-4" style="display: none;">
@@ -40,16 +57,10 @@
                     <th>Assigned Devices</th>
                 </tr>
             </thead>
-            <tbody id="resultsBody">
-            </tbody>
+            <tbody id="resultsBody"></tbody>
         </table>
-
         <button id="exportCsvBtn" class="btn btn-outline-success mb-3">Export CSV</button>
-
     </div>
-
-
-
 
     <div class="d-flex">
         <div id="toolbox" class="me-3">
@@ -65,21 +76,23 @@
             <img src="~/icons/phone.svg" draggable="true" class="draggable" data-type="phone" title="VoIP Phone" />
             <img src="~/icons/printer.svg" draggable="true" class="draggable" data-type="printer" title="Printer" />
             <img src="~/icons/server.svg" draggable="true" class="draggable" data-type="server" title="Server" />
-
         </div>
 
         <div class="canvas-wrapper position-relative" style="position: relative;">
             <svg id="connectionLayer"
-                 style="position:absolute; top:0; left:0; width:100%; height:100%;
-                z-index:2; pointer-events:auto;"></svg>
+                 style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:2; pointer-events:auto;">
+            </svg>
             <div id="canvas" class="canvas-area" style="position:relative; z-index:2;"></div>
         </div>
-
     </div>
 </div>
 
-
-
 @section Scripts {
+    <script>
+        function toggleHelp() {
+            const panel = document.querySelector('.visualizer-help');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
     <script src="~/js/visualizer.js"></script>
 }

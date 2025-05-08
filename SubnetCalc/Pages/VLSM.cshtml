@@ -21,83 +21,132 @@
         <h5>Subnets</h5>
 
         @for (int i = 0; i < Model.HostsPerSubnet.Count; i++)
-{
+        {
         <div class="input-group mb-3 align-items-center">
             <span class="input-group-text">Subnet @(i + 1)</span>
-            <input type="text" class="form-control" name="SubnetLabels[@i]" placeholder="Label (optional)" value="@(Model.SubnetLabels[i])" />
-            <input type="number" class="form-control" name="HostsPerSubnet[@i]"
+            <input type="text"
+                   class="form-control"
+                   name="SubnetLabels[@i]"
+                   placeholder="Label (optional)"
+                   value="@(Model.SubnetLabels[i])" />
+            <input type="number"
+                   class="form-control"
+                   name="HostsPerSubnet[@i]"
                    value="@(Model.HostsPerSubnet[i] == 0 ? "" : Model.HostsPerSubnet[i].ToString())"
-                   placeholder="Required Hosts" min="1" />
-            <button type="submit" name="RemoveSubnet" value="@i" class="btn btn-outline-danger ms-2" title="Remove Subnet">
+                   placeholder="Required Hosts"
+                   min="1" />
+            <button type="submit"
+                    name="RemoveSubnet"
+                    value="@i"
+                    class="btn btn-outline-danger ms-2"
+                    title="Remove Subnet">
                 <strong>&minus;</strong>
             </button>
         </div>
-}
+        }
 
-        <!-- ✅ Now this is OUTSIDE the loop -->
         <div class="d-flex gap-2 mb-4">
             <button type="submit" name="AddSubnet" class="btn btn-secondary">+ Add Subnet</button>
             <button type="submit" class="btn btn-primary">Calculate</button>
+            <button type="button"
+                    class="btn btn-primary ms-2"
+                    onclick="toggleHelp()">
+                Need Help?
+            </button>
             @if (Model.Results?.Any() == true)
-    {
+            {
             <button type="submit" name="ExportCsv" class="btn btn-outline-success">Export CSV</button>
-    }
+            }
         </div>
-
     </form>
 
+    <div class="calculator-help alert alert-secondary" style="display:none;">
+        <p><strong>What this calculator does:</strong></p>
+        <p>
+            This VLSM (Variable Length Subnet Mask) calculator takes a base network (IP + CIDR/mask)
+            and splits it into multiple sub-nets of just the right size, based on the number of hosts you
+            need in each one.
+        </p>
 
-    @section Scripts {
-        <script>
-            const hostsCheckbox = document.getElementById("EnableHosts");
-            const countCheckbox = document.getElementById("EnableCount");
-            const hostsSection = document.getElementById("hostsSection");
-            const countSection = document.getElementById("countSection");
-
-            function toggleSections() {
-                hostsSection.style.display = hostsCheckbox.checked ? "block" : "none";
-                countSection.style.display = countCheckbox.checked ? "block" : "none";
-            }
-
-            hostsCheckbox.addEventListener("change", toggleSections);
-            countCheckbox.addEventListener("change", toggleSections);
-            toggleSections();
-        </script>
-    }
-
+        <p><strong>How to use:</strong></p>
+        <ol>
+            <li>
+                Enter your <em>Base Network IP</em> (e.g. <code>10.200.0.0</code>) and its
+                <em>CIDR or subnet mask</em> (e.g. <code>/16</code>).
+            </li>
+            <li>
+                Under “Subnets,” for each line give it an optional label and the number of hosts
+                required (minimum 1).
+            </li>
+            <li>
+                Click <strong>+ Add Subnet</strong> to add more entries or the “–” button to remove one.
+            </li>
+            <li>
+                Hit <strong>Calculate</strong> to generate each subnet’s network address, CIDR,
+                subnet mask, first/last host, broadcast, and usable host count.
+            </li>
+            <li>
+                When you’re happy, use <strong>Export CSV</strong> to download the full table.
+            </li>
+        </ol>
+    </div>
 
     @if (Model.Results?.Any() == true)
     {
-        <h4 class="mt-5">Subnets</h4>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Label</th>
-                    <th>Network Address</th>
-                    <th>CIDR</th>
-                    <th>Subnet Mask</th>
-                    <th>First Host</th>
-                    <th>Last Host</th>
-                    <th>Broadcast</th>
-                    <th>Usable Hosts</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < Model.Results.Count; i++)
+    <h4 class="mt-5">Subnets</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Label</th>
+                <th>Network Address</th>
+                <th>CIDR</th>
+                <th>Subnet Mask</th>
+                <th>First Host</th>
+                <th>Last Host</th>
+                <th>Broadcast</th>
+                <th>Usable Hosts</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Results.Count; i++)
                 {
                     var subnet = Model.Results[i];
-                    <tr>
-                        <td>@subnet.Label</td>
-                        <td>@subnet.NetworkAddress</td>
-                        <td>@subnet.CidrNotation</td>
-                        <td>@subnet.SubnetMask</td>
-                        <td>@subnet.FirstHost</td>
-                        <td>@subnet.LastHost</td>
-                        <td>@subnet.BroadcastAddress</td>
-                        <td>@subnet.HostCount</td>
-                    </tr>
+            <tr>
+                <td>@subnet.Label</td>
+                <td>@subnet.NetworkAddress</td>
+                <td>@subnet.CidrNotation</td>
+                <td>@subnet.SubnetMask</td>
+                <td>@subnet.FirstHost</td>
+                <td>@subnet.LastHost</td>
+                <td>@subnet.BroadcastAddress</td>
+                <td>@subnet.HostCount</td>
+            </tr>
                 }
-            </tbody>
-        </table>
+        </tbody>
+    </table>
     }
 </div>
+
+@section Scripts {
+    <script>
+        const hostsCheckbox = document.getElementById("EnableHosts");
+        const countCheckbox = document.getElementById("EnableCount");
+        const hostsSection = document.getElementById("hostsSection");
+        const countSection = document.getElementById("countSection");
+
+        function toggleSections() {
+            hostsSection.style.display = hostsCheckbox.checked ? "block" : "none";
+            countSection.style.display = countCheckbox.checked ? "block" : "none";
+        }
+
+        if (hostsCheckbox) hostsCheckbox.addEventListener("change", toggleSections);
+        if (countCheckbox) countCheckbox.addEventListener("change", toggleSections);
+        toggleSections();
+
+        function toggleHelp() {
+            const panel = document.querySelector('.calculator-help');
+            if (!panel) return;
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+}
