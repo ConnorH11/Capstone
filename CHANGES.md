@@ -1,7 +1,12 @@
 # Changelog
 
-## 2025-05-08 4 Hours
+## 2025-05-09 3 Hours
+- Worked on bugs
+
+## 2025-05-08 7 Hours
 - Added help buttons to each calculator
+- Hosted it on a server in my house until my network went down the next day.
+- Started hosting a uptime service to track if it is up
 
 ## 2025-05-07 4 Hours
 - Added a donation button

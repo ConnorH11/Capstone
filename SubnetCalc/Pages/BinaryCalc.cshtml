@@ -4,25 +4,32 @@
     ViewData["Title"] = "Binary Calculator";
 }
 
+<!-- Page container -->
 <div class="container mt-4">
+
+    <!-- Page heading -->
     <h2 class="text-center mb-4">Binary Addition &amp; Subtraction Tool</h2>
 
+    <!-- First binary input -->
     <div class="mb-3">
         <label for="binary1" class="form-label">Binary Number 1:</label>
         <input type="text" class="form-control" id="binary1" placeholder="e.g. 1010">
     </div>
 
+    <!-- Second binary input -->
     <div class="mb-3">
         <label for="binary2" class="form-label">Binary Number 2:</label>
         <input type="text" class="form-control" id="binary2" placeholder="e.g. 0011">
     </div>
 
+    <!-- Action buttons -->
     <div class="mb-3 d-flex align-items-center gap-2">
         <button class="btn btn-success" id="addBtn">Add</button>
         <button class="btn btn-danger" id="subtractBtn">Subtract</button>
         <button type="button" class="btn btn-primary ms-3" onclick="toggleHelp()">Need Help?</button>
     </div>
 
+    <!-- Help panel (initially hidden) -->
     <div class="binary-help alert alert-secondary" style="display: none;">
         <p><strong>What this tool does:</strong></p>
         <p>This utility allows you to perform binary addition or subtraction on two binary numbers of your choice.</p>
@@ -36,15 +43,19 @@
         </ul>
     </div>
 
+    <!-- Result display -->
     <div id="binaryCalcResult" class="mt-3"></div>
 </div>
 
 @section Scripts {
+    <!-- Toggle the help panel -->
     <script>
         function toggleHelp() {
             const panel = document.querySelector('.binary-help');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         }
     </script>
+
+    <!-- Binary calculation logic -->
     <script src="~/js/binaryCalc.js"></script>
 }
