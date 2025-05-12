@@ -1,7 +1,10 @@
 # Changelog
 
+## 2025-05-12 3 Hours
+- Worked on debugging more, trying to figure out how I want to deploy it.
+
 ## 2025-05-09 3 Hours
-- Worked on bugs
+- Worked on bugs and remvoing silly code
 
 ## 2025-05-08 7 Hours
 - Added help buttons to each calculator
