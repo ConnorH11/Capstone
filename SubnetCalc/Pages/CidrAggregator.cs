@@ -5,9 +5,7 @@ using System.Net;
 
 public static class CidrAggregator
 {
-    /// <summary>
     /// Aggregates a list of CIDR blocks into the minimal number of covering blocks.
-    /// </summary>
     /// <param name="cidrs">List of input CIDR strings, e.g. "192.168.0.0/24".</param>
     /// <returns>List of aggregated CIDR strings.</returns>
     public static List<string> Aggregate(List<string> cidrs)
@@ -76,10 +74,8 @@ public static class CidrAggregator
             .ToList();
     }
 
-    /// <summary>
     /// Determines whether two blocks of equal prefix length can be merged into
     /// a single block with a shorter prefix (doubling the size).
-    /// </summary>
     private static bool CanMerge((uint Network, int Prefix) a,
                                  (uint Network, int Prefix) b,
                                  out (uint Network, int Prefix) merged)
@@ -104,9 +100,7 @@ public static class CidrAggregator
         return false;
     }
 
-    /// <summary>
     /// Converts an <see cref="IPAddress"/> (IPv4) to its 32‐bit unsigned integer representation.
-    /// </summary>
     private static uint IpToUint(IPAddress ip)
     {
         var bytes = ip.GetAddressBytes();
@@ -115,9 +109,7 @@ public static class CidrAggregator
         return BitConverter.ToUInt32(bytes, 0);
     }
 
-    /// <summary>
     /// Converts a 32‐bit unsigned integer back into an <see cref="IPAddress"/>.
-    /// </summary>
     private static IPAddress UintToIp(uint ip)
     {
         var bytes = BitConverter.GetBytes(ip);

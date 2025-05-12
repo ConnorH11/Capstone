@@ -5,22 +5,24 @@
 }
 
 <div class="container mt-5">
+    <!-- Page title -->
     <h2 class="text-center mb-4">Subnet Calculator</h2>
 
-
-
-
+    <!-- Validation errors -->
     @if (!ViewData.ModelState.IsValid)
-{
+    {
     <div class="alert alert-danger" role="alert">
         @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
+            {
+                <!-- Display each model error -->
         <div>@error.ErrorMessage</div>
-        }
+            }
     </div>
-}
+    }
 
+    <!-- Input form -->
     <form method="post" class="mb-4">
+        <!-- IP address input -->
         <div class="form-group mb-3">
             <label for="ipAddress">IP Address:</label>
             <input type="text"
@@ -30,6 +32,7 @@
                    placeholder="192.168.1.0"
                    value="@Model.IpAddress">
         </div>
+        <!-- CIDR or mask input -->
         <div class="form-group mb-3">
             <label for="cidrOrMask">CIDR or Subnet Mask:</label>
             <input type="text"
@@ -40,8 +43,11 @@
                    value="@Model.Cidr">
         </div>
 
+        <!-- Action buttons -->
         <div class="d-flex align-items-center mb-3">
+            <!-- Calculate button -->
             <button type="submit" class="btn btn-primary">Calculate</button>
+            <!-- Help toggle button -->
             <button type="button"
                     class="btn btn-primary ms-2"
                     onclick="toggleHelp()">
@@ -50,9 +56,12 @@
         </div>
     </form>
 
+    <!-- Help panel, hidden by default -->
     <div class="calculator-help alert alert-secondary" style="display:none;">
+        <!-- Description of functionality -->
         <p><strong>What this calculator does:</strong></p>
         <p>This tool helps you calculate subnet information based on the input IP and subnet mask.</p>
+        <!-- Usage instructions -->
         <p><strong>How to use:</strong></p>
         <ul>
             <li>Enter a valid IP address (e.g. 192.168.1.1) and CIDR (e.g. /24).</li>
@@ -62,32 +71,42 @@
     </div>
 </div>
 
+<!-- Results display -->
 @if (Model.Results != null)
-    {
+{
 <div class="card shadow-sm p-4">
     <h4>Results</h4>
     <ul class="list-unstyled">
+        <!-- Network address -->
         <li><strong>Network Address:</strong> @Model.Results.NetworkAddress</li>
+        <!-- Subnet mask -->
         <li><strong>Subnet Mask:</strong> @Model.Results.SubnetMask</li>
+        <!-- CIDR notation -->
         <li><strong>CIDR Notation:</strong> @Model.Results.CidrNotation</li>
+        <!-- Broadcast address -->
         <li><strong>Broadcast Address:</strong> @Model.Results.BroadcastAddress</li>
+        <!-- First host -->
         <li><strong>First Host:</strong> @Model.Results.FirstHost</li>
+        <!-- Last host -->
         <li><strong>Last Host:</strong> @Model.Results.LastHost</li>
+        <!-- Host count -->
         <li><strong>Number of Hosts:</strong> @Model.Results.HostCount</li>
+        <!-- Wildcard mask -->
         <li><strong>Wildcard Mask:</strong> @Model.Results.WildcardMask</li>
+        <!-- Binary subnet mask -->
         <li><strong>Binary Subnet Mask:</strong> @Model.Results.BinaryMask</li>
+        <!-- Network portion -->
         <li><strong>Network Portion:</strong> @Model.Results.NetworkPortion</li>
+        <!-- Host portion -->
         <li><strong>Host Portion:</strong> @Model.Results.HostPortion</li>
     </ul>
 </div>
-    }
+}
 
+<!-- JavaScript to toggle help panel -->
 <script>
     function toggleHelp() {
         const help = document.querySelector('.calculator-help');
         help.style.display = help.style.display === 'none' ? 'block' : 'none';
     }
 </script>
-
-
-

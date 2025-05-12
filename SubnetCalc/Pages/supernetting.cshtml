@@ -4,10 +4,13 @@
     ViewData["Title"] = "Supernetting Calculator";
 }
 
+<!-- Container for the Supernetting Calculator page -->
 <div class="container mt-5">
     <h2 class="text-center mb-4">Supernetting Calculator</h2>
 
+    <!-- Form for selecting mode and entering subnet CIDRs -->
     <form method="post">
+        <!-- Calculation mode radio buttons -->
         <div class="form-group mb-3">
             <label>Calculation Mode:</label>
             <div class="form-check">
@@ -28,6 +31,7 @@
             </div>
         </div>
 
+        <!-- Subnet CIDR input list -->
         <div class="form-group mb-3">
             <label>Enter Subnet CIDRs:</label>
             @for (int i = 0; i < Model.Subnets.Count; i++)
@@ -42,6 +46,7 @@
             }
         </div>
 
+        <!-- Action buttons: add subnet, calculate, help -->
         <div class="d-flex gap-2 mb-4">
             <button type="submit" name="AddSubnet" class="btn btn-secondary">
                 + Add Subnet
@@ -57,7 +62,7 @@
         </div>
     </form>
 
-    <!-- Help panel -->
+    <!-- Help panel: hidden by default, toggled via Need Help? button -->
     <div class="calculator-help alert alert-secondary" style="display:none;">
         <p><strong>What this calculator does:</strong></p>
         <p>
@@ -83,7 +88,7 @@
         </ul>
     </div>
 
-    @* Results for Aggregation *@
+    <!-- Results for CIDR aggregation mode -->
     @if (Model.Mode == "aggregate" && Model.AggregatedResults.Any())
     {
     <div class="card mt-4">
@@ -99,7 +104,7 @@
     </div>
     }
 
-    @* Results for Single Supernet *@
+    <!-- Results for single supernet mode -->
     @if (Model.Mode == "supernet" && Model.Result != null)
     {
     <div class="card mt-4">
@@ -116,6 +121,7 @@
 
 @section Scripts {
     <script>
+        // Toggles visibility of the help panel
         function toggleHelp() {
             const panel = document.querySelector('.calculator-help');
             if (!panel) return;
