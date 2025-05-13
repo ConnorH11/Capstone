@@ -1,5 +1,9 @@
 # Changelog
 
+## 2025-05-13 4 Hours
+- Added one last quality feature before final presentation
+- Deployed it properly
+
 ## 2025-05-12 3 Hours
 - Worked on debugging more, trying to figure out how I want to deploy it.
 

@@ -4,58 +4,73 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SubnetCalc.Pages
 {
-
+    /// <summary>
     /// PageModel for the Supernetting Calculator page.
-    /// Handles user input for both single supernet calculation and CIDR aggregation.
-
+    /// Handles add/remove of input rows plus the two calculation modes.
+    /// </summary>
     public class SupernettingModel : PageModel
     {
-
+        /// <summary>
         /// The list of subnet CIDR strings entered by the user.
-        /// Initialized with one empty entry to render the first input box.
-
+        /// </summary>
         [BindProperty]
         public List<string> Subnets { get; set; } = new() { "" };
 
-        /// Determines which calculation mode is active: "supernet" or "aggregate".
+        /// <summary>
+        /// Which calculation mode is active: "supernet" or "aggregate".
+        /// </summary>
         [BindProperty]
         public string Mode { get; set; } = "supernet";
 
-        /// Holds the result of a single supernet calculation.
-        /// Populated when Mode == "supernet".
+        /// <summary>
+        /// Result of the single-supernet calculation.
+        /// </summary>
         public SupernetResult Result { get; set; }
 
-        /// Holds the list of aggregated CIDR blocks.
-        /// Populated when Mode == "aggregate".
+        /// <summary>
+        /// Resulting list of aggregated CIDR blocks.
+        /// </summary>
         public List<string> AggregatedResults { get; set; } = new();
 
-        /// Handles POST requests from the form.
-        /// Adds new subnet input fields, or performs the selected calculation.
+        /// <summary>
+        /// Handles POST from the form: adding, removing rows, or performing the calculation.
+        /// </summary>
         public IActionResult OnPost()
         {
-            // If the user clicked "+ Add Subnet", add another empty input and redisplay
+            // 1) Add a new empty input row
             if (Request.Form.ContainsKey("AddSubnet"))
             {
                 Subnets.Add("");
                 return Page();
             }
 
+            // 2) Remove the specific row
+            if (Request.Form.ContainsKey("RemoveSubnet"))
+            {
+                // the value is the index of the row to remove
+                if (int.TryParse(Request.Form["RemoveSubnet"], out var idx)
+                    && idx >= 0
+                    && idx < Subnets.Count)
+                {
+                    Subnets.RemoveAt(idx);
+                }
+                return Page();
+            }
+
+            // 3) Otherwise perform the selected calculation
             try
             {
                 if (Mode == "supernet")
                 {
-                    // Compute the encompassing supernet for all provided CIDRs
                     Result = SupernetCalculator.Calculate(Subnets);
                 }
-                else if (Mode == "aggregate")
+                else // "aggregate"
                 {
-                    // Merge and minimize the list of CIDR blocks
                     AggregatedResults = CidrAggregator.Aggregate(Subnets);
                 }
             }
             catch (Exception ex)
             {
-                // Capture any errors (invalid input, etc.) and display to the user
                 ModelState.AddModelError(string.Empty, $"Error: {ex.Message}");
             }
 
@@ -63,22 +78,15 @@ namespace SubnetCalc.Pages
         }
     }
 
-    /// Represents the output of a supernet calculation.
+    /// <summary>
+    /// Represents the output of a single supernet calculation.
+    /// </summary>
     public class SupernetResult
     {
-        /// The combined CIDR notation (e.g. "192.168.0.0/22").
         public string Cidr { get; set; }
-
-        /// The network address portion of the supernet.
         public string Network { get; set; }
-
-        /// The subnet mask corresponding to the supernet prefix.
         public string Mask { get; set; }
-
-        /// The first usable IP address in the supernet.
         public string FirstHost { get; set; }
-
-        /// The last usable IP address in the supernet.
         public string LastHost { get; set; }
     }
 }

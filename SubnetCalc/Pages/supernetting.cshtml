@@ -35,15 +35,24 @@
         <div class="form-group mb-3">
             <label>Enter Subnet CIDRs:</label>
             @for (int i = 0; i < Model.Subnets.Count; i++)
-            {
+{
             <div class="input-group mb-2">
                 <input type="text"
                        class="form-control"
                        name="Subnets[@i]"
                        value="@Model.Subnets[i]"
                        placeholder="e.g., 192.168.0.0/24" />
+
+                <!-- remove-this-subnet button -->
+                <button type="submit"
+                        name="RemoveSubnet"
+                        value="@i"
+                        class="btn btn-outline-danger ms-2"
+                        title="Remove this subnet">
+                    &minus;
+                </button>
             </div>
-            }
+}
         </div>
 
         <!-- Action buttons: add subnet, calculate, help -->
