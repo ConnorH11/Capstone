@@ -18,6 +18,7 @@ jobs:
         host: ${{ secrets.SERVER_IP }}
         username: Administrator
         key: ${{ secrets.DEPLOY_KEY }}
+	passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 22
         script: |
           cd C:\Users\Administrator\Capstone
