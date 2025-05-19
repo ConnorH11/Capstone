@@ -109,4 +109,14 @@
         const help = document.querySelector('.calculator-help');
         help.style.display = help.style.display === 'none' ? 'block' : 'none';
     }
+    document.querySelector("form").addEventListener("submit", function (e) {
+        const cidrInput = document.getElementById("cidrOrMask").value.trim();
+        if (cidrInput.startsWith("/")) {
+            const cidrValue = parseInt(cidrInput.slice(1), 10);
+            if (isNaN(cidrValue) || cidrValue < 0 || cidrValue > 32) {
+                e.preventDefault();
+                alert("CIDR must be between /0 and /32.");
+            }
+        }
+    });
 </script>

@@ -26,6 +26,15 @@ namespace SubnetCalc.Pages
                 // Only calculate if both fields have been filled out
                 if (!string.IsNullOrEmpty(IpAddress) && !string.IsNullOrEmpty(Cidr))
                 {
+                    if (Cidr.StartsWith("/"))
+                    {
+                        if (!int.TryParse(Cidr.TrimStart('/'), out int cidrVal) || cidrVal < 0 || cidrVal > 32)
+                        {
+                            ModelState.AddModelError(string.Empty, "CIDR must be between /0 and /32.");
+                            return;
+                        }
+                    }
+
                     // Perform the core subnet calculation
                     Results = SubnetCalculator.Calculate(IpAddress, Cidr);
 
