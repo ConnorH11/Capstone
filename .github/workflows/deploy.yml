@@ -12,17 +12,23 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Publish .NET app
-        shell: powershell
-        run: |
-          cd C:\Users\Administrator\Capstone
-          git pull origin main
+- name: Publish .NET app
+  shell: powershell
+  run: |
+    cd C:\Users\Administrator\Capstone
+    git pull origin main
 
-          # Stop existing app
-          Get-Process dotnet -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*SubnetSuite*" } | Stop-Process -Force
+    # Kill the running app (forcefully stop any dotnet processes from the published folder)
+    Get-Process dotnet -ErrorAction SilentlyContinue | Where-Object {
+      $_.Path -like "*Published\\SubnetSuite\\*" 
+    } | Stop-Process -Force
 
-          # Publish to folder
-          dotnet publish .\SubnetCalc\SubnetCalc.csproj -c Release -o C:\Published\SubnetSuite --nologo
+    # Wait briefly to ensure file release
+    Start-Sleep -Seconds 2
 
-          # Start in background
-          Start-Process -FilePath "dotnet" -ArgumentList "C:\Published\SubnetSuite\SubnetCalc.dll", "--urls=http://localhost:5000"
+    # Now publish
+    dotnet publish .\SubnetCalc\SubnetCalc.csproj -c Release -o C:\Published\SubnetSuite --nologo
+
+    # Start the app again
+    Start-Process "dotnet" "C:\Published\SubnetSuite\SubnetCalc.dll --urls=http://localhost:5000"
+
