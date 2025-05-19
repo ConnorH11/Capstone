@@ -1,4 +1,4 @@
-name: Deploy SubnetSuite (Direct .NET Publish)
+name: Deploy SubnetSuite (Self-Hosted Runner)
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted  # This targets your self-hosted runner
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repo
@@ -17,6 +17,12 @@ jobs:
         run: |
           cd C:\Users\Administrator\Capstone
           git pull origin main
+
+          # Stop existing app
+          Get-Process dotnet -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*SubnetSuite*" } | Stop-Process -Force
+
+          # Publish to folder
           dotnet publish .\SubnetCalc\SubnetCalc.csproj -c Release -o C:\Published\SubnetSuite --nologo
-          Stop-Process -Name "dotnet" -Force -ErrorAction SilentlyContinue
-          Start-Process "dotnet" "C:\Published\SubnetSuite\SubnetCalc.dll"
+
+          # Start in background
+          Start-Process -FilePath "dotnet" -ArgumentList "C:\Published\SubnetSuite\SubnetCalc.dll", "--urls=http://localhost:5000"
