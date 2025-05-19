@@ -1,4 +1,4 @@
-name: Deploy SubnetSuite (Direct .NET Publish)
+name: Deploy SubnetSuite (Self-Hosted Runner)
 
 on:
   push:
@@ -6,17 +6,28 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted  # This targets your self-hosted runner
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Publish .NET app
+      - name: Pull latest changes and publish .NET app
         shell: powershell
         run: |
           cd C:\Users\Administrator\Capstone
           git pull origin main
+
+          # Stop the SubnetSuite Windows Service if running
+          if (Get-Service -Name "SubnetSuite2" -ErrorAction SilentlyContinue) {
+            Stop-Service -Name "SubnetSuite2" -Force
+            Start-Sleep -Seconds 3
+          }
+
+          # Publish the application
           dotnet publish .\SubnetCalc\SubnetCalc.csproj -c Release -o C:\Published\SubnetSuite --nologo
-          Stop-Process -Name "dotnet" -Force -ErrorAction SilentlyContinue
-          Start-Process "dotnet" "C:\Published\SubnetSuite\SubnetCalc.dll"
+
+      - name: Restart SubnetSuite service
+        shell: powershell
+        run: |
+          Start-Service -Name "SubnetSuite2"
