@@ -97,6 +97,19 @@
         </ul>
     </div>
 
+    @if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error:</strong>
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+        <div>@error.ErrorMessage</div>
+        }
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+
     <!-- Results for CIDR aggregation mode -->
     @if (Model.Mode == "aggregate" && Model.AggregatedResults.Any())
     {
@@ -147,4 +160,21 @@
 
         gtag('config', 'G-7CMQXDK64Z');
     </script>
+
+    <!-- Error Script -->
+    <script>
+            document.querySelector("form").addEventListener("submit", function (e) {
+                const cidrPattern = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}\/(3[0-2]|[1-2]?\d)$/;
+                const inputs = document.querySelectorAll("input[name^='Subnets']");
+                for (let input of inputs) {
+                    const value = input.value.trim();
+                    if (value.length > 0 && !cidrPattern.test(value)) {
+                        alert("Invalid CIDR format: " + value);
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            });
+     </script>
+
 }

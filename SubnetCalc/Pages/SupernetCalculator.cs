@@ -46,6 +46,19 @@ public static class SupernetCalculator
         IPAddress netIP = UintToIp(supernetAddress);
         IPAddress subnetMask = UintToIp(0xFFFFFFFF << (32 - commonPrefix));
 
+        //Error Checking
+        foreach (var (subnetAddress, prefix) in networks)
+        {
+            uint mask = 0xFFFFFFFF << (32 - prefix);
+            uint subnetNetwork = subnetAddress & mask;
+
+            // If subnet network doesn't match the masked supernet, it's not inside
+            if ((subnetNetwork & (0xFFFFFFFF << (32 - commonPrefix))) != supernetAddress)
+            {
+                throw new ArgumentException($"CIDR block {UintToIp(subnetAddress)}/{prefix} does not fit within the resulting supernet {netIP}/{commonPrefix}.");
+            }
+        }
+
         // Calculate first and last usable host addresses in the supernet
         uint firstHost = commonPrefix >= 31
             ? supernetAddress
