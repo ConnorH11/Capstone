@@ -285,10 +285,7 @@ function positionLabelNearDevice(deviceEl, labelEl, side = 'left', relatedEl = n
     labelEl.style.left = `${targetX}px`;
     labelEl.style.top = `${targetY}px`;
     labelEl.style.fontSize = '10px';
-    labelEl.style.background = side === 'gateway' ? '#d1ecf1' : '#fff';
-    labelEl.style.color = side === 'gateway' ? '#0c5460' : '#000';
-    labelEl.style.padding = '1px 4px';
-    labelEl.style.borderRadius = '4px';
+    // Removed inline styles for background/color to allow CSS classes to work
     labelEl.style.zIndex = '10';
     labelEl.style.border = '1px solid #ccc';
 }
@@ -596,9 +593,9 @@ document.getElementById("calculateBtn").addEventListener("click", () => {
             if (!device.ipAddressElement) {
                 device.ipAddressElement = document.createElement('div'); device.ipAddressElement.className = 'device-ip-display';
                 device.ipAddressElement.style.position = 'absolute'; device.ipAddressElement.style.fontSize = '10px';
-                device.ipAddressElement.style.color = '#000'; device.ipAddressElement.style.zIndex = "3";
-                device.ipAddressElement.style.backgroundColor = "rgba(255,255,255,0.7)"; device.ipAddressElement.style.padding = "1px 4px";
-                device.ipAddressElement.style.borderRadius = "4px"; canvas.appendChild(device.ipAddressElement);
+                // Removed inline styles for background/color to allow CSS classes to work
+                device.ipAddressElement.style.zIndex = "3";
+                canvas.appendChild(device.ipAddressElement);
             }
             device.ipAddressElement.innerText = device.ipAddress;
             const deviceRect = device.element.getBoundingClientRect(); const canvasRect = canvas.getBoundingClientRect();
@@ -695,9 +692,7 @@ canvas.addEventListener('drop', e => {
     label.style.height = '15px';
     label.style.left = `${dropX + (iconWidth / 2) - (parseInt(label.style.width) / 2)}px`;
     label.style.top = `${dropY + iconHeight + 5}px`;
-    label.style.fontSize = '10px'; label.style.color = '#333';
-    label.style.backgroundColor = 'rgba(255,255,255,0.6)';
-    label.style.padding = '1px 3px'; label.style.borderRadius = '3px';
+    // Removed inline styles for background/color to allow CSS classes to work
     label.style.zIndex = "3";
     deviceCounter++;
 

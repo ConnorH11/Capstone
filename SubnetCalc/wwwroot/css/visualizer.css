@@ -82,6 +82,58 @@
     color: #000;
 }
 
+.device-label {
+    background-color: rgba(255, 255, 255, 0.6);
+    color: #333;
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-size: 10px;
+    text-align: center;
+    z-index: 3;
+}
+
+.device-ip-display {
+    background-color: rgba(255, 255, 255, 0.7);
+    color: #000;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-size: 10px;
+    z-index: 3;
+}
+
+/* Dark Mode Overrides */
+body.dark-mode .canvas-wrapper {
+    border-color: #555;
+}
+
+body.dark-mode .device-label {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #ddd;
+}
+
+body.dark-mode .device-ip-display {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #ddd;
+}
+
+body.dark-mode .interface-ip-label {
+    background-color: #333;
+    color: #fff;
+    border-color: #555;
+}
+
+body.dark-mode .gateway-ip-label {
+    background-color: #103f46;
+    color: #d1ecf1;
+    border-color: #1b5c66;
+}
+
+body.dark-mode .custom-textbox {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-color: #666;
+}
+
 #canvas {
     position: relative;
     min-width: 100%;

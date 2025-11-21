@@ -31,6 +31,9 @@
                    name="IpAddress"
                    placeholder="192.168.1.0"
                    value="@Model.IpAddress">
+            <div class="invalid-feedback">
+                Please enter a valid IPv4 address (e.g. 192.168.1.1).
+            </div>
         </div>
         <!-- CIDR or mask input -->
         <div class="form-group mb-3">
@@ -40,7 +43,15 @@
                    id="cidrOrMask"
                    name="Cidr"
                    placeholder="/24 or 255.255.255.0"
+            <input type="text"
+                   class="form-control"
+                   id="cidrOrMask"
+                   name="Cidr"
+                   placeholder="/24 or 255.255.255.0"
                    value="@Model.Cidr">
+            <div class="invalid-feedback">
+                Please enter a valid CIDR (/0-/32) or Subnet Mask.
+            </div>
         </div>
 
         <!-- Action buttons -->
@@ -69,6 +80,15 @@
             <li>Review network address, broadcast, usable range, and host count.</li>
         </ul>
     </div>
+
+    <!-- Recent Calculations History -->
+    <div id="historySection" class="mt-4" style="display:none;">
+        <h4>Recent Calculations</h4>
+        <ul class="list-group" id="historyList">
+            <!-- History items will be injected here -->
+        </ul>
+        <button class="btn btn-sm btn-outline-danger mt-2" onclick="clearHistory()">Clear History</button>
+    </div>
 </div>
 
 <!-- Results display -->
@@ -78,17 +98,29 @@
     <h4>Results</h4>
     <ul class="list-unstyled">
         <!-- Network address -->
-        <li><strong>Network Address:</strong> @Model.Results.NetworkAddress</li>
+        <li>
+            <strong>Network Address:</strong> <span id="res-network">@Model.Results.NetworkAddress</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.NetworkAddress', this)">Copy</button>
+        </li>
         <!-- Subnet mask -->
         <li><strong>Subnet Mask:</strong> @Model.Results.SubnetMask</li>
         <!-- CIDR notation -->
         <li><strong>CIDR Notation:</strong> @Model.Results.CidrNotation</li>
         <!-- Broadcast address -->
-        <li><strong>Broadcast Address:</strong> @Model.Results.BroadcastAddress</li>
+        <li>
+            <strong>Broadcast Address:</strong> <span id="res-broadcast">@Model.Results.BroadcastAddress</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.BroadcastAddress', this)">Copy</button>
+        </li>
         <!-- First host -->
-        <li><strong>First Host:</strong> @Model.Results.FirstHost</li>
+        <li>
+            <strong>First Host:</strong> <span id="res-first">@Model.Results.FirstHost</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.FirstHost', this)">Copy</button>
+        </li>
         <!-- Last host -->
-        <li><strong>Last Host:</strong> @Model.Results.LastHost</li>
+        <li>
+            <strong>Last Host:</strong> <span id="res-last">@Model.Results.LastHost</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.LastHost', this)">Copy</button>
+        </li>
         <!-- Host count -->
         <li><strong>Hosts per subnet:</strong> @Model.Results.HostCount</li>
         <!-- Wildcard mask -->
@@ -100,7 +132,47 @@
         <!-- Host portion -->
         <li><strong>Host Portion:</strong> @Model.Results.HostPortion</li>
     </ul>
+
+    <!-- Visual Subnet Representation -->
+    <h5 class="mt-4">Subnet Visualization</h5>
+    @{
+        int cidrVal = 0;
+        if (!string.IsNullOrEmpty(Model.Results.CidrNotation) && Model.Results.CidrNotation.StartsWith("/"))
+        {
+            int.TryParse(Model.Results.CidrNotation.TrimStart('/'), out cidrVal);
+        }
+        int hostBits = 32 - cidrVal;
+        double netPercent = (cidrVal / 32.0) * 100;
+        double hostPercent = (hostBits / 32.0) * 100;
+    }
+    <div class="progress" style="height: 30px;">
+        <div class="progress-bar bg-primary" role="progressbar" style="width: @netPercent%" aria-valuenow="@cidrVal" aria-valuemin="0" aria-valuemax="32">
+            Network Bits (@cidrVal)
+        </div>
+        <div class="progress-bar bg-success" role="progressbar" style="width: @hostPercent%" aria-valuenow="@hostBits" aria-valuemin="0" aria-valuemax="32">
+            Host Bits (@hostBits)
+        </div>
+    </div>
+    <small class="text-muted">Total 32 bits: Blue = Network, Green = Host</small>
 </div>
+
+<script>
+    function copyToClipboard(text, btn) {
+        navigator.clipboard.writeText(text).then(function() {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-success');
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-secondary');
+            }, 2000);
+        }, function(err) {
+            console.error('Async: Could not copy text: ', err);
+        });
+    }
+</script>
 }
 
 <!-- JavaScript to toggle help panel -->
@@ -119,6 +191,103 @@
             }
         }
     });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ipInput = document.getElementById('ipAddress');
+        const cidrInput = document.getElementById('cidrOrMask');
+
+        function validateIp(ip) {
+            const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+            return ipv4Regex.test(ip);
+        }
+
+        function validateCidr(cidr) {
+            if (cidr.startsWith('/')) {
+                const val = parseInt(cidr.substring(1));
+                return !isNaN(val) && val >= 0 && val <= 32;
+            }
+            // Simple check for dotted decimal mask (basic format)
+            const maskRegex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+            return maskRegex.test(cidr);
+        }
+
+        function updateValidation(input, isValid) {
+            if (input.value.trim() === '') {
+                input.classList.remove('is-valid', 'is-invalid');
+                return;
+            }
+            if (isValid) {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+            } else {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+            }
+        }
+
+        ipInput.addEventListener('input', function() {
+            updateValidation(this, validateIp(this.value));
+        });
+
+        cidrInput.addEventListener('input', function() {
+            updateValidation(this, validateCidr(this.value));
+        });
+
+        // History Logic
+        loadHistory();
+
+        // If we have results, save them to history
+        @if (Model.Results != null)
+        {
+            <text>
+            saveToHistory('@Model.IpAddress', '@Model.Cidr');
+            </text>
+        }
+    });
+
+    function saveToHistory(ip, cidr) {
+        let history = JSON.parse(localStorage.getItem('subnetHistory') || '[]');
+        // Remove duplicate if exists
+        history = history.filter(item => !(item.ip === ip && item.cidr === cidr));
+        // Add to top
+        history.unshift({ ip: ip, cidr: cidr, timestamp: new Date().toLocaleString() });
+        // Keep max 5
+        if (history.length > 5) history.pop();
+        localStorage.setItem('subnetHistory', JSON.stringify(history));
+        loadHistory();
+    }
+
+    function loadHistory() {
+        const history = JSON.parse(localStorage.getItem('subnetHistory') || '[]');
+        const list = document.getElementById('historyList');
+        const section = document.getElementById('historySection');
+
+        if (history.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        list.innerHTML = '';
+        history.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center action-pointer';
+            li.style.cursor = 'pointer';
+            li.innerHTML = `<span><strong>${item.ip}</strong> ${item.cidr}</span> <small class="text-muted">${item.timestamp}</small>`;
+            li.onclick = () => {
+                document.getElementById('ipAddress').value = item.ip;
+                document.getElementById('cidrOrMask').value = item.cidr;
+                document.querySelector('form').submit();
+            };
+            list.appendChild(li);
+        });
+    }
+
+    function clearHistory() {
+        localStorage.removeItem('subnetHistory');
+        loadHistory();
+    }
 </script>
 
 <!-- Google tag (gtag.js) -->
