@@ -1,0 +1,114 @@
+@page
+@model SubnetCalc.Pages.ACLGeneratorModel
+@{
+    ViewData["Title"] = "ACL Generator";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">ACL Generator</h2>
+    <p class="text-center text-muted">Generate Cisco IOS and Juniper Junos ACL configurations.</p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="aclForm">
+                        <!-- Vendor & Type -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="vendor" class="form-label">Vendor</label>
+                                <select class="form-select" id="vendor">
+                                    <option value="cisco">Cisco IOS</option>
+                                    <option value="juniper">Juniper Junos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="aclType" class="form-label">ACL Type (Cisco)</label>
+                                <select class="form-select" id="aclType">
+                                    <option value="extended">Extended</option>
+                                    <option value="standard">Standard</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Action & Protocol -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="action" class="form-label">Action</label>
+                                <select class="form-select" id="action">
+                                    <option value="permit">Permit / Accept</option>
+                                    <option value="deny">Deny / Discard</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="protocol" class="form-label">Protocol</label>
+                                <select class="form-select" id="protocol">
+                                    <option value="any">Any</option>
+                                    <option value="ip">IP</option>
+                                    <option value="tcp">TCP</option>
+                                    <option value="udp">UDP</option>
+                                    <option value="icmp">ICMP</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <!-- Source -->
+                        <h5>Source</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-5">
+                                <label for="sourceIp" class="form-label">IP Address</label>
+                                <input type="text" class="form-control" id="sourceIp" placeholder="e.g. 192.168.1.0">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="sourceCidr" class="form-label">CIDR / Mask</label>
+                                <input type="text" class="form-control" id="sourceCidr" placeholder="e.g. /24">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="sourcePort" class="form-label">Port (Optional)</label>
+                                <input type="text" class="form-control port-input" id="sourcePort" placeholder="e.g. 80" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Destination -->
+                        <h5>Destination</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-5">
+                                <label for="destIp" class="form-label">IP Address</label>
+                                <input type="text" class="form-control" id="destIp" placeholder="e.g. 10.0.0.1">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="destCidr" class="form-label">CIDR / Mask</label>
+                                <input type="text" class="form-control" id="destCidr" placeholder="e.g. /32">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="destPort" class="form-label">Port (Optional)</label>
+                                <input type="text" class="form-control port-input" id="destPort" placeholder="e.g. 443" disabled>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-primary" id="generateBtn">Generate ACL</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Output -->
+            <div class="card mt-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Generated Configuration</h5>
+                    <textarea class="form-control font-monospace" id="aclOutput" rows="6" readonly></textarea>
+                    <button class="btn btn-outline-secondary mt-2" onclick="copyToClipboard(document.getElementById('aclOutput').value, this)">
+                        Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/aclGenerator.js"></script>
+}

@@ -8,152 +8,165 @@
 <div class="container mt-5">
     <h2 class="text-center mb-4">Supernetting Calculator</h2>
 
-    <!-- Form for selecting mode and entering subnet CIDRs -->
-    <form method="post">
-        <!-- Calculation mode radio buttons -->
-        <div class="form-group mb-3">
-            <label>Calculation Mode:</label>
-            <div class="form-check">
-                <input class="form-check-input"
-                       type="radio"
-                       name="Mode"
-                       value="supernet"
-                       checked="@(Model.Mode == "supernet")" />
-                <label class="form-check-label">Single Supernet CIDR</label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input"
-                       type="radio"
-                       name="Mode"
-                       value="aggregate"
-                       checked="@(Model.Mode == "aggregate")" />
-                <label class="form-check-label">CIDR Aggregation (Minimal Blocks)</label>
-            </div>
-        </div>
-
-        <!-- Subnet CIDR input list -->
-        <div class="form-group mb-3">
-            <label>Enter Subnet CIDRs:</label>
-            @for (int i = 0; i < Model.Subnets.Count; i++)
-{
-            <div class="input-group mb-2">
-                <input type="text"
-                       class="form-control"
-                       name="Subnets[@i]"
-                       value="@Model.Subnets[i]"
-                       placeholder="e.g., 192.168.0.0/24" />
-
-                <!-- remove-this-subnet button -->
-                <button type="submit"
-                        name="RemoveSubnet"
-                        value="@i"
-                        class="btn btn-outline-danger ms-2"
-                        title="Remove this subnet">
-                    &minus;
-                </button>
-            </div>
-}
-        </div>
-
-        <!-- Action buttons: add subnet, calculate, help -->
-        <div class="d-flex gap-2 mb-4">
-            <button type="submit" name="AddSubnet" class="btn btn-secondary">
-                + Add Subnet
-            </button>
-            <button type="submit" class="btn btn-primary">
-                Calculate Supernet
-            </button>
-            <button type="button"
-                    class="btn btn-primary ms-2"
-                    onclick="toggleHelp()">
-                Need Help?
-            </button>
-        </div>
-    </form>
-
-    <!-- Help panel: hidden by default, toggled via Need Help? button -->
-    <div class="calculator-help alert alert-secondary" style="display:none;">
-        <p><strong>What this calculator does:</strong></p>
-        <p>
-            <em>Single Supernet CIDR</em> mode finds the smallest single CIDR block
-            that covers all of the subnets you enter.<br />
-            <em>CIDR Aggregation</em> mode merges your list into the minimal set
-            of non-overlapping CIDR prefixes.
-        </p>
-
-        <p><strong>How to use:</strong></p>
-        <ul>
-            <li>Select your calculation mode at the top.</li>
-            <li>Enter each existing subnet in CIDR format (e.g., <code>10.0.1.0/24</code>).</li>
-            <li>Click <strong>+ Add Subnet</strong> to add more lines or remove rows manually in your form post-handler.</li>
-            <li>Hit <strong>Calculate Supernet</strong>.</li>
-            <li>
-                In <strong>Supernet</strong> mode you’ll see the single enclosing CIDR,
-                its network address, mask, and host range.<br />
-                In <strong>Aggregate</strong> mode you’ll get a bullet-list of
-                the minimal aggregated CIDR blocks.
-            </li>
-            <li>Optionally integrate or export those results as needed.</li>
-        </ul>
-    </div>
-
-    @if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <strong>Error:</strong>
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-        {
-        <div>@error.ErrorMessage</div>
-        }
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
-
-    <!-- Results for CIDR aggregation mode -->
-    @if (Model.Mode == "aggregate" && Model.AggregatedResults.Any())
-    {
-    <div class="card mt-4">
-        <div class="card-body">
-            <h5 class="card-title">CIDR Aggregated Blocks</h5>
-            <ul>
-                @foreach (var cidr in Model.AggregatedResults)
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Validation Errors -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Error:</strong>
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                     {
-                <li>
-                    @cidr
-                    <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@cidr', this)">Copy</button>
-                </li>
+                        <div>@error.ErrorMessage</div>
                     }
-            </ul>
-        </div>
-    </div>
-    }
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
 
-    <!-- Results for single supernet mode -->
-    @if (Model.Mode == "supernet" && Model.Result != null)
-    {
-    <div class="card mt-4">
-        <div class="card-body">
-            <h5 class="card-title">Supernet Result</h5>
-            <p>
-                <strong>Supernet CIDR:</strong> @Model.Result.Cidr
-                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.Cidr', this)">Copy</button>
-            </p>
-            <p>
-                <strong>Network Address:</strong> @Model.Result.Network
-                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.Network', this)">Copy</button>
-            </p>
-            <p>
-                <strong>Subnet Mask:</strong> @Model.Result.Mask
-                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.Mask', this)">Copy</button>
-            </p>
-            <p>
-                <strong>IP Range:</strong> @Model.Result.FirstHost - @Model.Result.LastHost
-                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.FirstHost - @Model.Result.LastHost', this)">Copy</button>
-            </p>
+            <!-- Input Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <!-- Form for selecting mode and entering subnet CIDRs -->
+                    <form method="post">
+                        <!-- Calculation mode radio buttons -->
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold">Calculation Mode</label>
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="Mode"
+                                       value="supernet"
+                                       id="modeSupernet"
+                                       checked="@(Model.Mode == "supernet")" />
+                                <label class="form-check-label" for="modeSupernet">Single Supernet CIDR</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="Mode"
+                                       value="aggregate"
+                                       id="modeAggregate"
+                                       checked="@(Model.Mode == "aggregate")" />
+                                <label class="form-check-label" for="modeAggregate">CIDR Aggregation (Minimal Blocks)</label>
+                            </div>
+                        </div>
+
+                        <!-- Subnet CIDR input list -->
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold">Enter Subnet CIDRs</label>
+                            @for (int i = 0; i < Model.Subnets.Count; i++)
+                            {
+                            <div class="input-group mb-2">
+                                <input type="text"
+                                       class="form-control"
+                                       name="Subnets[@i]"
+                                       value="@Model.Subnets[i]"
+                                       placeholder="e.g., 192.168.0.0/24" />
+
+                                <!-- remove-this-subnet button -->
+                                <button type="submit"
+                                        name="RemoveSubnet"
+                                        value="@i"
+                                        class="btn btn-outline-danger"
+                                        title="Remove this subnet">
+                                    &minus;
+                                </button>
+                            </div>
+                            }
+                        </div>
+
+                        <!-- Action buttons: add subnet, calculate, help -->
+                        <div class="d-flex gap-2 mb-2 mt-4">
+                            <button type="submit" name="AddSubnet" class="btn btn-secondary">
+                                + Add Subnet
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Calculate Supernet
+                            </button>
+                            <button type="button"
+                                    class="btn btn-outline-info ms-auto"
+                                    onclick="toggleHelp()">
+                                Need Help?
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help panel: hidden by default, toggled via Need Help? button -->
+            <div class="calculator-help alert alert-secondary mb-4" style="display:none;">
+                <p><strong>What this calculator does:</strong></p>
+                <p>
+                    <em>Single Supernet CIDR</em> mode finds the smallest single CIDR block
+                    that covers all of the subnets you enter.<br />
+                    <em>CIDR Aggregation</em> mode merges your list into the minimal set
+                    of non-overlapping CIDR prefixes.
+                </p>
+
+                <p><strong>How to use:</strong></p>
+                <ul>
+                    <li>Select your calculation mode at the top.</li>
+                    <li>Enter each existing subnet in CIDR format (e.g., <code>10.0.1.0/24</code>).</li>
+                    <li>Click <strong>+ Add Subnet</strong> to add more lines or remove rows manually in your form post-handler.</li>
+                    <li>Hit <strong>Calculate Supernet</strong>.</li>
+                    <li>
+                        In <strong>Supernet</strong> mode you’ll see the single enclosing CIDR,
+                        its network address, mask, and host range.<br />
+                        In <strong>Aggregate</strong> mode you’ll get a bullet-list of
+                        the minimal aggregated CIDR blocks.
+                    </li>
+                    <li>Optionally integrate or export those results as needed.</li>
+                </ul>
+            </div>
+
+            <!-- Results for CIDR aggregation mode -->
+            @if (Model.Mode == "aggregate" && Model.AggregatedResults.Any())
+            {
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">CIDR Aggregated Blocks</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var cidr in Model.AggregatedResults)
+                            {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @cidr
+                            <button class="btn btn-sm btn-outline-secondary py-0" onclick="copyToClipboard('@cidr', this)">Copy</button>
+                        </li>
+                            }
+                    </ul>
+                </div>
+            </div>
+            }
+
+            <!-- Results for single supernet mode -->
+            @if (Model.Mode == "supernet" && Model.Result != null)
+            {
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Supernet Result</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <strong>Supernet CIDR:</strong> @Model.Result.Cidr
+                            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.Cidr', this)">Copy</button>
+                        </li>
+                        <li class="mb-2">
+                            <strong>Network Address:</strong> @Model.Result.Network
+                            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.Network', this)">Copy</button>
+                        </li>
+                        <li class="mb-2">
+                            <strong>Subnet Mask:</strong> @Model.Result.Mask
+                            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.Mask', this)">Copy</button>
+                        </li>
+                        <li class="mb-2">
+                            <strong>IP Range:</strong> @Model.Result.FirstHost - @Model.Result.LastHost
+                            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.FirstHost - @Model.Result.LastHost', this)">Copy</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            }
         </div>
     </div>
-    }
 </div>
 
 @section Scripts {

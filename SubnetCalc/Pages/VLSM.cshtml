@@ -7,163 +7,177 @@
 <div class="container mt-5">
     <h2 class="text-center mb-4">VLSM Subnetting Calculator</h2>
 
-    <!-- Calculation form -->
-    <form method="post">
-        <!-- Base network input -->
-        <div class="mb-3">
-            <label asp-for="BaseNetwork" class="form-label">Base Network IP</label>
-            <input asp-for="BaseNetwork" class="form-control" id="BaseNetwork" placeholder="e.g. 192.168.0.0" />
-            <div class="invalid-feedback">Please enter a valid IPv4 address.</div>
-        </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Input Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <!-- Calculation form -->
+                    <form method="post">
+                        <!-- Base network input -->
+                        <div class="mb-3">
+                            <label asp-for="BaseNetwork" class="form-label">Base Network IP</label>
+                            <input asp-for="BaseNetwork" class="form-control" id="BaseNetwork" placeholder="e.g. 192.168.0.0" />
+                            <div class="invalid-feedback">Please enter a valid IPv4 address.</div>
+                        </div>
 
-        <!-- CIDR/mask input -->
-        <div class="mb-3">
-            <label asp-for="BaseCidr" class="form-label">CIDR or Subnet Mask</label>
-            <input asp-for="BaseCidr" class="form-control" id="BaseCidr" placeholder="e.g. /24" />
-            <div class="invalid-feedback">Please enter a valid CIDR (/0-/32) or Subnet Mask.</div>
-        </div>
+                        <!-- CIDR/mask input -->
+                        <div class="mb-3">
+                            <label asp-for="BaseCidr" class="form-label">CIDR or Subnet Mask</label>
+                            <input asp-for="BaseCidr" class="form-control" id="BaseCidr" placeholder="e.g. /24" />
+                            <div class="invalid-feedback">Please enter a valid CIDR (/0-/32) or Subnet Mask.</div>
+                        </div>
 
-        <h5>Subnets</h5>
+                        <h5 class="mt-4 mb-3">Subnets</h5>
 
-        <!-- Dynamic subnet entries -->
-        <!-- Dynamic subnet entries -->
-        <div id="subnetsContainer">
-            @for (int i = 0; i < Model.HostsPerSubnet.Count; i++)
-            {
-            <div class="input-group mb-3 align-items-center">
-                <span class="input-group-text">Subnet @(i + 1)</span>
-                <input type="text"
-                       class="form-control"
-                       name="SubnetLabels[@i]"
-                       placeholder="Label (optional)"
-                       value="@(Model.SubnetLabels[i])" />
-                <input type="number"
-                       class="form-control"
-                       name="HostsPerSubnet[@i]"
-                       value="@(Model.HostsPerSubnet[i] == 0 ? "" : Model.HostsPerSubnet[i].ToString())"
-                       placeholder="Required Hosts"
-                       min="1" />
-                <button type="submit"
-                        name="RemoveSubnet"
-                        value="@i"
-                        class="btn btn-outline-danger ms-2"
-                        title="Remove Subnet">
-                    <strong>&minus;</strong>
-                </button>
+                        <!-- Dynamic subnet entries -->
+                        <div id="subnetsContainer">
+                            @for (int i = 0; i < Model.HostsPerSubnet.Count; i++)
+                            {
+                            <div class="input-group mb-3 align-items-center">
+                                <span class="input-group-text">Subnet @(i + 1)</span>
+                                <input type="text"
+                                       class="form-control"
+                                       name="SubnetLabels[@i]"
+                                       placeholder="Label (optional)"
+                                       value="@(Model.SubnetLabels[i])" />
+                                <input type="number"
+                                       class="form-control"
+                                       name="HostsPerSubnet[@i]"
+                                       value="@(Model.HostsPerSubnet[i] == 0 ? "" : Model.HostsPerSubnet[i].ToString())"
+                                       placeholder="Required Hosts"
+                                       min="1" />
+                                <button type="submit"
+                                        name="RemoveSubnet"
+                                        value="@i"
+                                        class="btn btn-outline-danger ms-2"
+                                        title="Remove Subnet">
+                                    <strong>&minus;</strong>
+                                </button>
+                            </div>
+                            }
+                        </div>
+
+                        <!-- Form action buttons -->
+                        <div class="d-flex gap-2 mb-4 mt-4">
+                            <button type="submit" name="AddSubnet" class="btn btn-secondary">+ Add Subnet</button>
+                            <button type="submit" class="btn btn-primary">Calculate</button>
+                            <button type="button"
+                                    class="btn btn-outline-info"
+                                    onclick="toggleHelp()">
+                                Need Help?
+                            </button>
+                            @if (Model.Results?.Any() == true)
+                            {
+                            <button type="submit" name="ExportCsv" class="btn btn-outline-success ms-auto">Export CSV</button>
+                            }
+                        </div>
+                    </form>
+                </div>
             </div>
-            }
-        </div>
 
-        <!-- Form action buttons -->
-        <div class="d-flex gap-2 mb-4">
-            <button type="submit" name="AddSubnet" class="btn btn-secondary">+ Add Subnet</button>
-            <button type="submit" class="btn btn-primary">Calculate</button>
-            <button type="button"
-                    class="btn btn-primary ms-2"
-                    onclick="toggleHelp()">
-                Need Help?
-            </button>
+            <!-- Help panel -->
+            <div class="calculator-help alert alert-secondary mb-4" style="display:none;">
+                <p><strong>What this calculator does:</strong></p>
+                <p>
+                    This VLSM (Variable Length Subnet Mask) calculator takes a base network (IP + CIDR/mask)
+                    and splits it into multiple sub-nets of just the right size, based on the number of hosts you
+                    need in each one.
+                </p>
+
+                <p><strong>How to use:</strong></p>
+                <ol>
+                    <li>
+                        Enter your <em>Base Network IP</em> (e.g. <code>10.200.0.0</code>) and its
+                        <em>CIDR or subnet mask</em> (e.g. <code>/16</code>).
+                    </li>
+                    <li>
+                        Under “Subnets,” for each line give it an optional label and the number of hosts
+                        required (minimum 1).
+                    </li>
+                    <li>
+                        Click <strong>+ Add Subnet</strong> to add more entries or the “–” button to remove one.
+                    </li>
+                    <li>
+                        Hit <strong>Calculate</strong> to generate each subnet’s network address, CIDR,
+                        subnet mask, first/last host, broadcast, and usable host count.
+                    </li>
+                    <li>
+                        When you’re happy, use <strong>Export CSV</strong> to download the full table.
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Results table -->
             @if (Model.Results?.Any() == true)
             {
-            <button type="submit" name="ExportCsv" class="btn btn-outline-success">Export CSV</button>
+            <div class="card shadow-sm p-4 mb-4">
+                <h4 class="card-title mb-3">Subnets</h4>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <th>Network Address</th>
+                                <th>CIDR</th>
+                                <th>Subnet Mask</th>
+                                <th>First Host</th>
+                                <th>Last Host</th>
+                                <th>Broadcast</th>
+                                <th>Usable Hosts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Results.Count; i++)
+                                {
+                                    var subnet = Model.Results[i];
+                            <tr>
+                                <td>@subnet.Label</td>
+                                <td>
+                                    @subnet.NetworkAddress
+                                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.NetworkAddress', this)">Copy</button>
+                                </td>
+                                <td>
+                                    @subnet.CidrNotation
+                                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.CidrNotation', this)">Copy</button>
+                                </td>
+                                <td>
+                                    @subnet.SubnetMask
+                                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.SubnetMask', this)">Copy</button>
+                                </td>
+                                <td>
+                                    @subnet.FirstHost
+                                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.FirstHost', this)">Copy</button>
+                                </td>
+                                <td>
+                                    @subnet.LastHost
+                                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.LastHost', this)">Copy</button>
+                                </td>
+                                <td>
+                                    @subnet.BroadcastAddress
+                                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.BroadcastAddress', this)">Copy</button>
+                                </td>
+                                <td>@subnet.HostCount</td>
+                            </tr>
+                                }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             }
+
+            <!-- Recent Calculations History -->
+            <div id="historySection" class="card shadow-sm mb-4" style="display:none;">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Calculations</h4>
+                    <ul class="list-group list-group-flush" id="historyList">
+                        <!-- History items will be injected here -->
+                    </ul>
+                    <button class="btn btn-sm btn-outline-danger mt-3" onclick="clearHistory()">Clear History</button>
+                </div>
+            </div>
         </div>
-    </form>
-
-    <!-- Help panel -->
-    <div class="calculator-help alert alert-secondary" style="display:none;">
-        <p><strong>What this calculator does:</strong></p>
-        <p>
-            This VLSM (Variable Length Subnet Mask) calculator takes a base network (IP + CIDR/mask)
-            and splits it into multiple sub-nets of just the right size, based on the number of hosts you
-            need in each one.
-        </p>
-
-        <p><strong>How to use:</strong></p>
-        <ol>
-            <li>
-                Enter your <em>Base Network IP</em> (e.g. <code>10.200.0.0</code>) and its
-                <em>CIDR or subnet mask</em> (e.g. <code>/16</code>).
-            </li>
-            <li>
-                Under “Subnets,” for each line give it an optional label and the number of hosts
-                required (minimum 1).
-            </li>
-            <li>
-                Click <strong>+ Add Subnet</strong> to add more entries or the “–” button to remove one.
-            </li>
-            <li>
-                Hit <strong>Calculate</strong> to generate each subnet’s network address, CIDR,
-                subnet mask, first/last host, broadcast, and usable host count.
-            </li>
-            <li>
-                When you’re happy, use <strong>Export CSV</strong> to download the full table.
-            </li>
-        </ol>
     </div>
-
-    <!-- Recent Calculations History -->
-    <div id="historySection" class="mt-4" style="display:none;">
-        <h4>Recent Calculations</h4>
-        <ul class="list-group" id="historyList">
-            <!-- History items will be injected here -->
-        </ul>
-        <button class="btn btn-sm btn-outline-danger mt-2" onclick="clearHistory()">Clear History</button>
-    </div>
-
-    <!-- Results table -->
-    @if (Model.Results?.Any() == true)
-    {
-    <h4 class="mt-5">Subnets</h4>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Label</th>
-                <th>Network Address</th>
-                <th>CIDR</th>
-                <th>Subnet Mask</th>
-                <th>First Host</th>
-                <th>Last Host</th>
-                <th>Broadcast</th>
-                <th>Usable Hosts</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < Model.Results.Count; i++)
-                {
-                    var subnet = Model.Results[i];
-            <tr>
-                <td>@subnet.Label</td>
-                <td>
-                    @subnet.NetworkAddress
-                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.NetworkAddress', this)">Copy</button>
-                </td>
-                <td>
-                    @subnet.CidrNotation
-                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.CidrNotation', this)">Copy</button>
-                </td>
-                <td>
-                    @subnet.SubnetMask
-                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.SubnetMask', this)">Copy</button>
-                </td>
-                <td>
-                    @subnet.FirstHost
-                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.FirstHost', this)">Copy</button>
-                </td>
-                <td>
-                    @subnet.LastHost
-                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.LastHost', this)">Copy</button>
-                </td>
-                <td>
-                    @subnet.BroadcastAddress
-                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.BroadcastAddress', this)">Copy</button>
-                </td>
-                <td>@subnet.HostCount</td>
-            </tr>
-                }
-        </tbody>
-    </table>
-    }
 </div>
 
 @section Scripts {

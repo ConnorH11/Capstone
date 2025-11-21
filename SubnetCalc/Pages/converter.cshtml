@@ -7,69 +7,78 @@
 <div class="container mt-4">
     <h2 class="text-center mb-4">Binary / Hex / Decimal Converter</h2>
 
-    <!-- Enter Value -->
-    <div class="mb-3">
-        <label for="inputValue" class="form-label">Enter Value:</label>
-        <input type="text"
-               id="inputValue"
-               class="form-control"
-               placeholder="e.g. 255 or FF or 11111111">
-    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Input Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <!-- Enter Value -->
+                    <div class="mb-3">
+                        <label for="inputValue" class="form-label">Enter Value:</label>
+                        <input type="text"
+                               id="inputValue"
+                               class="form-control"
+                               placeholder="e.g. 255 or FF or 11111111">
+                    </div>
 
-    <!-- Input Format -->
-    <div class="mb-3">
-        <label class="form-label">Input Format:</label>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input"
-                   type="radio"
-                   name="inputFormat"
-                   id="formatDecimal"
-                   value="decimal"
-                   checked>
-            <label class="form-check-label" for="formatDecimal">Decimal</label>
+                    <!-- Input Format -->
+                    <div class="mb-3">
+                        <label class="form-label">Input Format:</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="inputFormat"
+                                   id="formatDecimal"
+                                   value="decimal"
+                                   checked>
+                            <label class="form-check-label" for="formatDecimal">Decimal</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="inputFormat"
+                                   id="formatHex"
+                                   value="hex">
+                            <label class="form-check-label" for="formatHex">Hexadecimal</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="inputFormat"
+                                   id="formatBinary"
+                                   value="binary">
+                            <label class="form-check-label" for="formatBinary">Binary</label>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex mt-4">
+                        <button id="convertBtn" class="btn btn-primary me-2">Convert</button>
+                        <button type="button" class="btn btn-outline-info ms-auto" onclick="toggleHelp()">Need Help?</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Panel -->
+            <div class="converter-help alert alert-secondary mb-4" style="display: none;">
+                <p><strong>What this converter does:</strong></p>
+                <p>
+                    It takes your input in one of the three formats (decimal, hexadecimal or binary)
+                    and shows you its equivalent in the other two.
+                </p>
+                <p><strong>How to use:</strong></p>
+                <ul>
+                    <li>Type a value (e.g. <code>255</code>, <code>FF</code>, or <code>11111111</code>).</li>
+                    <li>Select its format above.</li>
+                    <li>Click <strong>Convert</strong>.</li>
+                    <li>The results pane below will display the value in decimal, hex, and binary.</li>
+                </ul>
+            </div>
+
+            <!-- Results -->
+            <div id="conversionResults" class="mt-4"></div>
         </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input"
-                   type="radio"
-                   name="inputFormat"
-                   id="formatHex"
-                   value="hex">
-            <label class="form-check-label" for="formatHex">Hexadecimal</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input"
-                   type="radio"
-                   name="inputFormat"
-                   id="formatBinary"
-                   value="binary">
-            <label class="form-check-label" for="formatBinary">Binary</label>
-        </div>
     </div>
-
-    <!-- Buttons -->
-    <div class="mb-4">
-        <button id="convertBtn" class="btn btn-primary me-2">Convert</button>
-        <button type="button" class="btn btn-primary" onclick="toggleHelp()">Need Help?</button>
-    </div>
-
-    <!-- Help Panel -->
-    <div class="converter-help alert alert-secondary" style="display: none;">
-        <p><strong>What this converter does:</strong></p>
-        <p>
-            It takes your input in one of the three formats (decimal, hexadecimal or binary)
-            and shows you its equivalent in the other two.
-        </p>
-        <p><strong>How to use:</strong></p>
-        <ul>
-            <li>Type a value (e.g. <code>255</code>, <code>FF</code>, or <code>11111111</code>).</li>
-            <li>Select its format above.</li>
-            <li>Click <strong>Convert</strong>.</li>
-            <li>The results pane below will display the value in decimal, hex, and binary.</li>
-        </ul>
-    </div>
-
-    <!-- Results -->
-    <div id="conversionResults" class="mt-4"></div>
 </div>
 
 @section Scripts {

@@ -8,172 +8,150 @@
     <!-- Page title -->
     <h2 class="text-center mb-4">IPv4 Subnet Calculator (FLSM)</h2>
 
-    <!-- Validation errors -->
-    @if (!ViewData.ModelState.IsValid)
-    {
-    <div class="alert alert-danger" role="alert">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Validation errors -->
+            @if (!ViewData.ModelState.IsValid)
             {
-                <!-- Display each model error -->
-        <div>@error.ErrorMessage</div>
+                <div class="alert alert-danger" role="alert">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
+                </div>
             }
-    </div>
-    }
 
-    <!-- Input form -->
-    <form method="post" class="mb-4">
-        <!-- IP address input -->
-        <div class="form-group mb-3">
-            <label for="ipAddress">IP Address:</label>
-            <input type="text"
-                   class="form-control"
-                   id="ipAddress"
-                   name="IpAddress"
-                   placeholder="192.168.1.0"
-                   value="@Model.IpAddress">
-            <div class="invalid-feedback">
-                Please enter a valid IPv4 address (e.g. 192.168.1.1).
+            <!-- Input Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="post">
+                        <!-- IP address input -->
+                        <div class="mb-3">
+                            <label for="ipAddress" class="form-label">IP Address</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="ipAddress"
+                                   name="IpAddress"
+                                   placeholder="192.168.1.0"
+                                   value="@Model.IpAddress">
+                            <div class="invalid-feedback">
+                                Please enter a valid IPv4 address (e.g. 192.168.1.1).
+                            </div>
+                        </div>
+                        <!-- CIDR or mask input -->
+                        <div class="mb-3">
+                            <label for="cidrOrMask" class="form-label">CIDR or Subnet Mask</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="cidrOrMask"
+                                   name="Cidr"
+                                   placeholder="/24 or 255.255.255.0"
+                                   value="@Model.Cidr">
+                            <div class="invalid-feedback">
+                                Please enter a valid CIDR (/0-/32) or Subnet Mask.
+                            </div>
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-info me-md-2" onclick="toggleHelp()">Need Help?</button>
+                            <button type="submit" class="btn btn-primary">Calculate</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help panel -->
+            <div class="calculator-help alert alert-secondary mb-4" style="display:none;">
+                <p><strong>What this calculator does:</strong></p>
+                <p>This tool helps you calculate subnet information based on the input IP and subnet mask.</p>
+                <p><strong>How to use:</strong></p>
+                <ul>
+                    <li>Enter a valid IP address (e.g. 192.168.1.1) and CIDR (e.g. /24).</li>
+                    <li>Click "Calculate" to generate subnet data.</li>
+                    <li>Review network address, broadcast, usable range, and host count.</li>
+                </ul>
+            </div>
+
+            <!-- Results display -->
+            @if (Model.Results != null)
+            {
+                <div class="card shadow-sm p-4 mb-4">
+                    <h4 class="card-title mb-3">Results</h4>
+                    <ul class="list-unstyled">
+                        <!-- Network address -->
+                        <li class="mb-2">
+                            <strong>Network Address:</strong> <span id="res-network">@Model.Results.NetworkAddress</span>
+                            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.NetworkAddress', this)">Copy</button>
+                        </li>
+                        <!-- Subnet mask -->
+                        <li class="mb-2"><strong>Subnet Mask:</strong> @Model.Results.SubnetMask</li>
+                        <!-- CIDR notation -->
+                        <li class="mb-2"><strong>CIDR Notation:</strong> @Model.Results.CidrNotation</li>
+                        <!-- Broadcast address -->
+                        <li class="mb-2">
+                            <strong>Broadcast Address:</strong> <span id="res-broadcast">@Model.Results.BroadcastAddress</span>
+                            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.BroadcastAddress', this)">Copy</button>
+                        </li>
+                        <!-- First host -->
+                        <li class="mb-2">
+                            <strong>First Host:</strong> <span id="res-first">@Model.Results.FirstHost</span>
+                            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.FirstHost', this)">Copy</button>
+                        </li>
+                        <!-- Last host -->
+                        <li class="mb-2">
+                            <strong>Last Host:</strong> <span id="res-last">@Model.Results.LastHost</span>
+                            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.LastHost', this)">Copy</button>
+                        </li>
+                        <!-- Host count -->
+                        <li class="mb-2"><strong>Hosts per subnet:</strong> @Model.Results.HostCount</li>
+                        <!-- Wildcard mask -->
+                        <li class="mb-2"><strong>Wildcard Mask:</strong> @Model.Results.WildcardMask</li>
+                        <!-- Binary subnet mask -->
+                        <li class="mb-2"><strong>Binary Subnet Mask:</strong> @Model.Results.BinaryMask</li>
+                        <!-- Network portion -->
+                        <li class="mb-2"><strong>Network Portion:</strong> @Model.Results.NetworkPortion</li>
+                        <!-- Host portion -->
+                        <li class="mb-2"><strong>Host Portion:</strong> @Model.Results.HostPortion</li>
+                    </ul>
+
+                    <!-- Visual Subnet Representation -->
+                    <h5 class="mt-4">Subnet Visualization</h5>
+                    @{
+                        int cidrVal = 0;
+                        if (!string.IsNullOrEmpty(Model.Results.CidrNotation) && Model.Results.CidrNotation.StartsWith("/"))
+                        {
+                            int.TryParse(Model.Results.CidrNotation.TrimStart('/'), out cidrVal);
+                        }
+                        int hostBits = 32 - cidrVal;
+                        double netPercent = (cidrVal / 32.0) * 100;
+                        double hostPercent = (hostBits / 32.0) * 100;
+                    }
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: @netPercent%" aria-valuenow="@cidrVal" aria-valuemin="0" aria-valuemax="32">
+                            Network Bits (@cidrVal)
+                        </div>
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @hostPercent%" aria-valuenow="@hostBits" aria-valuemin="0" aria-valuemax="32">
+                            Host Bits (@hostBits)
+                        </div>
+                    </div>
+                    <small class="text-muted">Total 32 bits: Blue = Network, Green = Host</small>
+                </div>
+            }
+
+            <!-- Recent Calculations History -->
+            <div id="historySection" class="card shadow-sm mb-4" style="display:none;">
+                <div class="card-body">
+                    <h4 class="card-title">Recent Calculations</h4>
+                    <ul class="list-group list-group-flush" id="historyList">
+                        <!-- History items will be injected here -->
+                    </ul>
+                    <button class="btn btn-sm btn-outline-danger mt-3" onclick="clearHistory()">Clear History</button>
+                </div>
             </div>
         </div>
-        <!-- CIDR or mask input -->
-        <div class="form-group mb-3">
-            <label for="cidrOrMask">CIDR or Subnet Mask:</label>
-            <input type="text"
-                   class="form-control"
-                   id="cidrOrMask"
-                   name="Cidr"
-                   placeholder="/24 or 255.255.255.0"
-            <input type="text"
-                   class="form-control"
-                   id="cidrOrMask"
-                   name="Cidr"
-                   placeholder="/24 or 255.255.255.0"
-                   value="@Model.Cidr">
-            <div class="invalid-feedback">
-                Please enter a valid CIDR (/0-/32) or Subnet Mask.
-            </div>
-        </div>
-
-        <!-- Action buttons -->
-        <div class="d-flex align-items-center mb-3">
-            <!-- Calculate button -->
-            <button type="submit" class="btn btn-primary">Calculate</button>
-            <!-- Help toggle button -->
-            <button type="button"
-                    class="btn btn-primary ms-2"
-                    onclick="toggleHelp()">
-                Need Help?
-            </button>
-        </div>
-    </form>
-
-    <!-- Help panel, hidden by default -->
-    <div class="calculator-help alert alert-secondary" style="display:none;">
-        <!-- Description of functionality -->
-        <p><strong>What this calculator does:</strong></p>
-        <p>This tool helps you calculate subnet information based on the input IP and subnet mask.</p>
-        <!-- Usage instructions -->
-        <p><strong>How to use:</strong></p>
-        <ul>
-            <li>Enter a valid IP address (e.g. 192.168.1.1) and CIDR (e.g. /24).</li>
-            <li>Click "Calculate" to generate subnet data.</li>
-            <li>Review network address, broadcast, usable range, and host count.</li>
-        </ul>
-    </div>
-
-    <!-- Recent Calculations History -->
-    <div id="historySection" class="mt-4" style="display:none;">
-        <h4>Recent Calculations</h4>
-        <ul class="list-group" id="historyList">
-            <!-- History items will be injected here -->
-        </ul>
-        <button class="btn btn-sm btn-outline-danger mt-2" onclick="clearHistory()">Clear History</button>
     </div>
 </div>
-
-<!-- Results display -->
-@if (Model.Results != null)
-{
-<div class="card shadow-sm p-4">
-    <h4>Results</h4>
-    <ul class="list-unstyled">
-        <!-- Network address -->
-        <li>
-            <strong>Network Address:</strong> <span id="res-network">@Model.Results.NetworkAddress</span>
-            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.NetworkAddress', this)">Copy</button>
-        </li>
-        <!-- Subnet mask -->
-        <li><strong>Subnet Mask:</strong> @Model.Results.SubnetMask</li>
-        <!-- CIDR notation -->
-        <li><strong>CIDR Notation:</strong> @Model.Results.CidrNotation</li>
-        <!-- Broadcast address -->
-        <li>
-            <strong>Broadcast Address:</strong> <span id="res-broadcast">@Model.Results.BroadcastAddress</span>
-            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.BroadcastAddress', this)">Copy</button>
-        </li>
-        <!-- First host -->
-        <li>
-            <strong>First Host:</strong> <span id="res-first">@Model.Results.FirstHost</span>
-            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.FirstHost', this)">Copy</button>
-        </li>
-        <!-- Last host -->
-        <li>
-            <strong>Last Host:</strong> <span id="res-last">@Model.Results.LastHost</span>
-            <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Results.LastHost', this)">Copy</button>
-        </li>
-        <!-- Host count -->
-        <li><strong>Hosts per subnet:</strong> @Model.Results.HostCount</li>
-        <!-- Wildcard mask -->
-        <li><strong>Wildcard Mask:</strong> @Model.Results.WildcardMask</li>
-        <!-- Binary subnet mask -->
-        <li><strong>Binary Subnet Mask:</strong> @Model.Results.BinaryMask</li>
-        <!-- Network portion -->
-        <li><strong>Network Portion:</strong> @Model.Results.NetworkPortion</li>
-        <!-- Host portion -->
-        <li><strong>Host Portion:</strong> @Model.Results.HostPortion</li>
-    </ul>
-
-    <!-- Visual Subnet Representation -->
-    <h5 class="mt-4">Subnet Visualization</h5>
-    @{
-        int cidrVal = 0;
-        if (!string.IsNullOrEmpty(Model.Results.CidrNotation) && Model.Results.CidrNotation.StartsWith("/"))
-        {
-            int.TryParse(Model.Results.CidrNotation.TrimStart('/'), out cidrVal);
-        }
-        int hostBits = 32 - cidrVal;
-        double netPercent = (cidrVal / 32.0) * 100;
-        double hostPercent = (hostBits / 32.0) * 100;
-    }
-    <div class="progress" style="height: 30px;">
-        <div class="progress-bar bg-primary" role="progressbar" style="width: @netPercent%" aria-valuenow="@cidrVal" aria-valuemin="0" aria-valuemax="32">
-            Network Bits (@cidrVal)
-        </div>
-        <div class="progress-bar bg-success" role="progressbar" style="width: @hostPercent%" aria-valuenow="@hostBits" aria-valuemin="0" aria-valuemax="32">
-            Host Bits (@hostBits)
-        </div>
-    </div>
-    <small class="text-muted">Total 32 bits: Blue = Network, Green = Host</small>
-</div>
-
-<script>
-    function copyToClipboard(text, btn) {
-        navigator.clipboard.writeText(text).then(function() {
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
-            btn.classList.remove('btn-outline-secondary');
-            btn.classList.add('btn-success');
-            setTimeout(() => {
-                btn.innerHTML = originalHtml;
-                btn.classList.remove('btn-success');
-                btn.classList.add('btn-outline-secondary');
-            }, 2000);
-        }, function(err) {
-            console.error('Async: Could not copy text: ', err);
-        });
-    }
-</script>
-}
 
 <!-- JavaScript to toggle help panel -->
 <script>
@@ -256,12 +234,14 @@
     }
 </script>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-7CMQXDK64Z"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+@section Scripts {
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7CMQXDK64Z"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-    gtag('config', 'G-7CMQXDK64Z');
-</script>
+        gtag('config', 'G-7CMQXDK64Z');
+    </script>
+}

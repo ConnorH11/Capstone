@@ -9,48 +9,57 @@
     <!-- Page title -->
     <h2 class="text-center mb-4">IPv6 Subnet Calculator</h2>
 
-    <!-- Input form -->
-    <form>
-        <!-- IPv6 address with prefix input -->
-        <div class="mb-3">
-            <label for="ipv6Address" class="form-label">IPv6 Address with Prefix:</label>
-            <input type="text" class="form-control" id="ipv6Address" placeholder="e.g. 2001:db8::/64">
-        </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Input Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <!-- Input form -->
+                    <form>
+                        <!-- IPv6 address with prefix input -->
+                        <div class="mb-3">
+                            <label for="ipv6Address" class="form-label">IPv6 Address with Prefix:</label>
+                            <input type="text" class="form-control" id="ipv6Address" placeholder="e.g. 2001:db8::/64">
+                        </div>
 
-        <!-- Number of subnets input -->
-        <div class="mb-3">
-            <label for="subnetCount" class="form-label">Number of Subnets to Create:</label>
-            <input type="number" class="form-control" id="subnetCount" placeholder="e.g. 4">
-        </div>
+                        <!-- Number of subnets input -->
+                        <div class="mb-3">
+                            <label for="subnetCount" class="form-label">Number of Subnets to Create:</label>
+                            <input type="number" class="form-control" id="subnetCount" placeholder="e.g. 4">
+                        </div>
 
-        <!-- Action buttons -->
-        <div class="d-flex gap-2 mb-4">
-            <!-- Calculate button -->
-            <button type="button" class="btn btn-primary" onclick="calculateIPv6()">Calculate</button>
-            <!-- Help toggle button -->
-            <button type="button" class="btn btn-primary ms-2" onclick="toggleHelp()">Need Help?</button>
-        </div>
-    </form>
+                        <!-- Action buttons -->
+                        <div class="d-flex gap-2 mt-4">
+                            <!-- Calculate button -->
+                            <button type="button" class="btn btn-primary" onclick="calculateIPv6()">Calculate</button>
+                            <!-- Help toggle button -->
+                            <button type="button" class="btn btn-outline-info ms-auto" onclick="toggleHelp()">Need Help?</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-    <!-- Help panel, hidden by default -->
-    <div class="ipv6-help alert alert-secondary" style="display: none;">
-        <!-- Description of functionality -->
-        <p><strong>What this calculator does:</strong></p>
-        <p>
-            Splits a given IPv6 network (e.g. <code>2001:db8::/64</code>) into the number of equal-sized subnets you request.
-        </p>
-        <!-- Usage instructions -->
-        <p><strong>How to use:</strong></p>
-        <ul>
-            <li>Enter your base IPv6 network with prefix (e.g. <code>2001:db8:abcd::/48</code>).</li>
-            <li>Specify how many subnets you need (e.g. <code>8</code> for eight /51 subnets).</li>
-            <li>Click “Calculate” to generate each subnet’s network address and new prefix.</li>
-            <li>Review the resulting list below.</li>
-        </ul>
+            <!-- Help panel, hidden by default -->
+            <div class="ipv6-help alert alert-secondary mb-4" style="display: none;">
+                <!-- Description of functionality -->
+                <p><strong>What this calculator does:</strong></p>
+                <p>
+                    Splits a given IPv6 network (e.g. <code>2001:db8::/64</code>) into the number of equal-sized subnets you request.
+                </p>
+                <!-- Usage instructions -->
+                <p><strong>How to use:</strong></p>
+                <ul>
+                    <li>Enter your base IPv6 network with prefix (e.g. <code>2001:db8:abcd::/48</code>).</li>
+                    <li>Specify how many subnets you need (e.g. <code>8</code> for eight /51 subnets).</li>
+                    <li>Click “Calculate” to generate each subnet’s network address and new prefix.</li>
+                    <li>Review the resulting list below.</li>
+                </ul>
+            </div>
+
+            <!-- Calculation result placeholder -->
+            <div id="result" class="mt-4"></div>
+        </div>
     </div>
-
-    <!-- Calculation result placeholder -->
-    <div id="result" class="mt-4"></div>
 </div>
 
 @section Scripts {
