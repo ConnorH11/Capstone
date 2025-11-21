@@ -35,12 +35,20 @@ function calculateIPv6() {
 
         // Build the initial result HTML
         let outputHtml = `
-            <p><strong>Expanded:</strong> ${expanded}</p>
-            <p><strong>Compressed:</strong> ${compressed}</p>
+            <p>
+                <strong>Expanded:</strong> ${expanded}
+                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('${expanded}', this)">Copy</button>
+            </p>
+            <p>
+                <strong>Compressed:</strong> ${compressed}
+                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('${compressed}', this)">Copy</button>
+            </p>
             <p><strong>Prefix:</strong> /${prefix}</p>
-            <p><strong>Usable Range:</strong><br>
-               ${compressIPv6(binaryToIPv6(baseBinary.padEnd(128, '0')))} - 
-               ${compressIPv6(binaryToIPv6(baseBinary.padEnd(128, '1')))}
+            <p>
+                <strong>Usable Range:</strong><br>
+                ${compressIPv6(binaryToIPv6(baseBinary.padEnd(128, '0')))} - 
+                ${compressIPv6(binaryToIPv6(baseBinary.padEnd(128, '1')))}
+                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('${compressIPv6(binaryToIPv6(baseBinary.padEnd(128, '0')))} - ${compressIPv6(binaryToIPv6(baseBinary.padEnd(128, '1')))}', this)">Copy</button>
             </p>
         `;
 
@@ -60,7 +68,11 @@ function calculateIPv6() {
                 for (let i = 0; i < subnetCount; i++) {
                     const subnetBinary = baseBinary + intToBinary(i, neededBits).padEnd(hostBits, '0');
                     const subnetAddress = binaryToIPv6(subnetBinary);
-                    outputHtml += `<li class="list-group-item">${subnetAddress} /${newPrefix}</li>`;
+                    outputHtml += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>${subnetAddress} /${newPrefix}</span>
+                            <button class="btn btn-sm btn-outline-secondary py-0" onclick="copyToClipboard('${subnetAddress} /${newPrefix}', this)">Copy</button>
+                        </li>`;
                 }
 
                 outputHtml += `</ul>`;

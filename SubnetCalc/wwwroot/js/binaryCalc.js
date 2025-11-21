@@ -13,8 +13,14 @@ function showResult(binary, decimal, label) {
     const resultDiv = document.getElementById("binaryCalcResult");
     resultDiv.innerHTML = `
         <div class="alert alert-info">
-            <p><strong>${label} (Binary):</strong> ${binary}</p>
-            <p><strong>${label} (Decimal):</strong> ${decimal}</p>
+            <p>
+                <strong>${label} (Binary):</strong> ${binary}
+                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('${binary}', this)">Copy</button>
+            </p>
+            <p>
+                <strong>${label} (Decimal):</strong> ${decimal}
+                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('${decimal}', this)">Copy</button>
+            </p>
         </div>
     `;
 }

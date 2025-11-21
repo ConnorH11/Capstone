@@ -119,7 +119,10 @@
             <ul>
                 @foreach (var cidr in Model.AggregatedResults)
                     {
-                <li>@cidr</li>
+                <li>
+                    @cidr
+                    <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@cidr', this)">Copy</button>
+                </li>
                     }
             </ul>
         </div>
@@ -132,10 +135,22 @@
     <div class="card mt-4">
         <div class="card-body">
             <h5 class="card-title">Supernet Result</h5>
-            <p><strong>Supernet CIDR:</strong> @Model.Result.Cidr</p>
-            <p><strong>Network Address:</strong> @Model.Result.Network</p>
-            <p><strong>Subnet Mask:</strong> @Model.Result.Mask</p>
-            <p><strong>IP Range:</strong> @Model.Result.FirstHost - @Model.Result.LastHost</p>
+            <p>
+                <strong>Supernet CIDR:</strong> @Model.Result.Cidr
+                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.Cidr', this)">Copy</button>
+            </p>
+            <p>
+                <strong>Network Address:</strong> @Model.Result.Network
+                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.Network', this)">Copy</button>
+            </p>
+            <p>
+                <strong>Subnet Mask:</strong> @Model.Result.Mask
+                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.Mask', this)">Copy</button>
+            </p>
+            <p>
+                <strong>IP Range:</strong> @Model.Result.FirstHost - @Model.Result.LastHost
+                <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('@Model.Result.FirstHost - @Model.Result.LastHost', this)">Copy</button>
+            </p>
         </div>
     </div>
     }
@@ -162,19 +177,49 @@
     </script>
 
     <!-- Error Script -->
+    <!-- Error Script -->
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll("input[name^='Subnets']");
+            
+            // Attach input listeners
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    updateInputValidation(this, validateSubnetString(this.value));
+                });
+            });
+
             document.querySelector("form").addEventListener("submit", function (e) {
-                const cidrPattern = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}\/(3[0-2]|[1-2]?\d)$/;
+                // Check if we are removing a subnet (don't validate if removing)
+                // But the button name is RemoveSubnet.
+                // We can check document.activeElement
+                if (document.activeElement && document.activeElement.name === 'RemoveSubnet') {
+                    return;
+                }
+
+                let valid = true;
                 const inputs = document.querySelectorAll("input[name^='Subnets']");
                 for (let input of inputs) {
                     const value = input.value.trim();
-                    if (value.length > 0 && !cidrPattern.test(value)) {
-                        alert("Invalid CIDR format: " + value);
-                        e.preventDefault();
-                        return;
+                    // If empty, maybe ignore? Or require it? 
+                    // The original script checked if length > 0.
+                    if (value.length > 0) {
+                        if (!validateSubnetString(value)) {
+                            input.classList.add('is-invalid');
+                            valid = false;
+                        } else {
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
                     }
                 }
+
+                if (!valid) {
+                    e.preventDefault();
+                    // Optional: alert("Please fix invalid subnets.");
+                }
             });
+        });
      </script>
 
 }

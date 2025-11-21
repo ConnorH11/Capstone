@@ -44,9 +44,18 @@ document.getElementById("convertBtn").addEventListener("click", () => {
         // Render the successful conversion results
         resultDiv.innerHTML = `
             <div class="alert alert-success">
-                <p><strong>Decimal:</strong> ${decimalValue}</p>
-                <p><strong>Binary:</strong> ${binaryResult}</p>
-                <p><strong>Hexadecimal:</strong> ${hexResult}</p>
+                <p>
+                    <strong>Decimal:</strong> ${decimalValue}
+                    <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('${decimalValue}', this)">Copy</button>
+                </p>
+                <p>
+                    <strong>Binary:</strong> ${binaryResult}
+                    <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('${binaryResult}', this)">Copy</button>
+                </p>
+                <p>
+                    <strong>Hexadecimal:</strong> ${hexResult}
+                    <button class="btn btn-sm btn-outline-secondary ms-2 py-0" onclick="copyToClipboard('${hexResult}', this)">Copy</button>
+                </p>
             </div>
         `;
     } catch (err) {

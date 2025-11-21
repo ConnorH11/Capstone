@@ -12,42 +12,47 @@
         <!-- Base network input -->
         <div class="mb-3">
             <label asp-for="BaseNetwork" class="form-label">Base Network IP</label>
-            <input asp-for="BaseNetwork" class="form-control" placeholder="e.g. 192.168.0.0" />
+            <input asp-for="BaseNetwork" class="form-control" id="BaseNetwork" placeholder="e.g. 192.168.0.0" />
+            <div class="invalid-feedback">Please enter a valid IPv4 address.</div>
         </div>
 
         <!-- CIDR/mask input -->
         <div class="mb-3">
             <label asp-for="BaseCidr" class="form-label">CIDR or Subnet Mask</label>
-            <input asp-for="BaseCidr" class="form-control" placeholder="e.g. /24" />
+            <input asp-for="BaseCidr" class="form-control" id="BaseCidr" placeholder="e.g. /24" />
+            <div class="invalid-feedback">Please enter a valid CIDR (/0-/32) or Subnet Mask.</div>
         </div>
 
         <h5>Subnets</h5>
 
         <!-- Dynamic subnet entries -->
-        @for (int i = 0; i < Model.HostsPerSubnet.Count; i++)
-        {
-        <div class="input-group mb-3 align-items-center">
-            <span class="input-group-text">Subnet @(i + 1)</span>
-            <input type="text"
-                   class="form-control"
-                   name="SubnetLabels[@i]"
-                   placeholder="Label (optional)"
-                   value="@(Model.SubnetLabels[i])" />
-            <input type="number"
-                   class="form-control"
-                   name="HostsPerSubnet[@i]"
-                   value="@(Model.HostsPerSubnet[i] == 0 ? "" : Model.HostsPerSubnet[i].ToString())"
-                   placeholder="Required Hosts"
-                   min="1" />
-            <button type="submit"
-                    name="RemoveSubnet"
-                    value="@i"
-                    class="btn btn-outline-danger ms-2"
-                    title="Remove Subnet">
-                <strong>&minus;</strong>
-            </button>
+        <!-- Dynamic subnet entries -->
+        <div id="subnetsContainer">
+            @for (int i = 0; i < Model.HostsPerSubnet.Count; i++)
+            {
+            <div class="input-group mb-3 align-items-center">
+                <span class="input-group-text">Subnet @(i + 1)</span>
+                <input type="text"
+                       class="form-control"
+                       name="SubnetLabels[@i]"
+                       placeholder="Label (optional)"
+                       value="@(Model.SubnetLabels[i])" />
+                <input type="number"
+                       class="form-control"
+                       name="HostsPerSubnet[@i]"
+                       value="@(Model.HostsPerSubnet[i] == 0 ? "" : Model.HostsPerSubnet[i].ToString())"
+                       placeholder="Required Hosts"
+                       min="1" />
+                <button type="submit"
+                        name="RemoveSubnet"
+                        value="@i"
+                        class="btn btn-outline-danger ms-2"
+                        title="Remove Subnet">
+                    <strong>&minus;</strong>
+                </button>
+            </div>
+            }
         </div>
-        }
 
         <!-- Form action buttons -->
         <div class="d-flex gap-2 mb-4">
@@ -97,6 +102,15 @@
         </ol>
     </div>
 
+    <!-- Recent Calculations History -->
+    <div id="historySection" class="mt-4" style="display:none;">
+        <h4>Recent Calculations</h4>
+        <ul class="list-group" id="historyList">
+            <!-- History items will be injected here -->
+        </ul>
+        <button class="btn btn-sm btn-outline-danger mt-2" onclick="clearHistory()">Clear History</button>
+    </div>
+
     <!-- Results table -->
     @if (Model.Results?.Any() == true)
     {
@@ -120,12 +134,30 @@
                     var subnet = Model.Results[i];
             <tr>
                 <td>@subnet.Label</td>
-                <td>@subnet.NetworkAddress</td>
-                <td>@subnet.CidrNotation</td>
-                <td>@subnet.SubnetMask</td>
-                <td>@subnet.FirstHost</td>
-                <td>@subnet.LastHost</td>
-                <td>@subnet.BroadcastAddress</td>
+                <td>
+                    @subnet.NetworkAddress
+                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.NetworkAddress', this)">Copy</button>
+                </td>
+                <td>
+                    @subnet.CidrNotation
+                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.CidrNotation', this)">Copy</button>
+                </td>
+                <td>
+                    @subnet.SubnetMask
+                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.SubnetMask', this)">Copy</button>
+                </td>
+                <td>
+                    @subnet.FirstHost
+                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.FirstHost', this)">Copy</button>
+                </td>
+                <td>
+                    @subnet.LastHost
+                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.LastHost', this)">Copy</button>
+                </td>
+                <td>
+                    @subnet.BroadcastAddress
+                    <button class="btn btn-sm btn-outline-secondary ms-1 py-0" onclick="copyToClipboard('@subnet.BroadcastAddress', this)">Copy</button>
+                </td>
                 <td>@subnet.HostCount</td>
             </tr>
                 }
@@ -141,6 +173,151 @@
             const panel = document.querySelector('.calculator-help');
             if (!panel) return;
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Attach validation
+            attachValidation('BaseNetwork', 'BaseCidr');
+
+            // Form submission check
+            document.querySelector("form").addEventListener("submit", function (e) {
+                // Only validate on "Calculate" or "AddSubnet" - actually, we should probably validate on all?
+                // But let's check which button was clicked? 
+                // For simplicity, let's just validate the base network inputs on submit if they are present.
+                const ipInput = document.getElementById("BaseNetwork");
+                const cidrInput = document.getElementById("BaseCidr");
+                
+                let valid = true;
+                if (!validateIPv4(ipInput.value)) {
+                    ipInput.classList.add('is-invalid');
+                    valid = false;
+                }
+                if (!validateCIDR(cidrInput.value)) {
+                    cidrInput.classList.add('is-invalid');
+                    valid = false;
+                }
+
+                if (!valid) {
+                    // Check if we are just adding/removing subnets? 
+                    // Ideally we want valid base network before calculating.
+                    // But maybe we allow adding subnets even if base is invalid?
+                    // Let's prevent submission to be safe and consistent.
+                    e.preventDefault();
+                }
+            });
+
+            // History Logic
+            loadHistory();
+
+            @if (Model.Results?.Any() == true)
+            {
+                var hostsJson = System.Text.Json.JsonSerializer.Serialize(Model.HostsPerSubnet);
+                var labelsJson = System.Text.Json.JsonSerializer.Serialize(Model.SubnetLabels);
+                <text>
+                saveToHistory('@Model.BaseNetwork', '@Model.BaseCidr', @Html.Raw(hostsJson), @Html.Raw(labelsJson));
+                </text>
+            }
+        });
+
+        function saveToHistory(network, cidr, hosts, labels) {
+            let history = JSON.parse(localStorage.getItem('vlsmHistory') || '[]');
+            // Remove duplicate if exists (simple check based on network/cidr)
+            history = history.filter(item => !(item.network === network && item.cidr === cidr));
+            
+            // Add to top
+            history.unshift({
+                network: network,
+                cidr: cidr,
+                hosts: hosts,
+                labels: labels,
+                timestamp: new Date().toLocaleString()
+            });
+            
+            // Keep max 5
+            if (history.length > 5) history.pop();
+            localStorage.setItem('vlsmHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('vlsmHistory') || '[]');
+            const list = document.getElementById('historyList');
+            const section = document.getElementById('historySection');
+
+            if (history.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            list.innerHTML = '';
+            history.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center action-pointer';
+                li.style.cursor = 'pointer';
+                
+                // Display summary
+                const subnetCount = item.hosts ? item.hosts.length : 0;
+                li.innerHTML = `
+                    <div>
+                        <strong>${item.network}</strong> ${item.cidr}
+                        <div class="text-muted small">${subnetCount} subnets</div>
+                    </div>
+                    <small class="text-muted">${item.timestamp}</small>
+                `;
+                
+                li.onclick = () => {
+                    // 1. Restore Base Network & CIDR
+                    document.getElementById('BaseNetwork').value = item.network;
+                    document.getElementById('BaseCidr').value = item.cidr;
+
+                    // 2. Restore Subnets
+                    const container = document.getElementById('subnetsContainer');
+                    container.innerHTML = ''; // Clear existing
+
+                    if (item.hosts && item.hosts.length > 0) {
+                        item.hosts.forEach((hostCount, index) => {
+                            const label = (item.labels && item.labels[index]) ? item.labels[index] : '';
+                            
+                            const div = document.createElement('div');
+                            div.className = 'input-group mb-3 align-items-center';
+                            div.innerHTML = `
+                                <span class="input-group-text">Subnet ${index + 1}</span>
+                                <input type="text"
+                                       class="form-control"
+                                       name="SubnetLabels[${index}]"
+                                       placeholder="Label (optional)"
+                                       value="${label}" />
+                                <input type="number"
+                                       class="form-control"
+                                       name="HostsPerSubnet[${index}]"
+                                       value="${hostCount}"
+                                       placeholder="Required Hosts"
+                                       min="1" />
+                                <button type="submit"
+                                        name="RemoveSubnet"
+                                        value="${index}"
+                                        class="btn btn-outline-danger ms-2"
+                                        title="Remove Subnet">
+                                    <strong>&minus;</strong>
+                                </button>
+                            `;
+                            container.appendChild(div);
+                        });
+                    }
+
+                    // 3. Submit the form to calculate and show results
+                    // We need to find the form element. Since these inputs are inside the form, we can use closest.
+                    // Or just document.forms[0] if it's the first form.
+                    document.forms[0].submit();
+                };
+                list.appendChild(li);
+            });
+        }
+
+        function clearHistory() {
+            localStorage.removeItem('vlsmHistory');
+            loadHistory();
         }
     </script>
 

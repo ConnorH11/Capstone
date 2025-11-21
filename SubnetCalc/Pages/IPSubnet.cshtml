@@ -181,57 +181,23 @@
         const help = document.querySelector('.calculator-help');
         help.style.display = help.style.display === 'none' ? 'block' : 'none';
     }
-    document.querySelector("form").addEventListener("submit", function (e) {
-        const cidrInput = document.getElementById("cidrOrMask").value.trim();
-        if (cidrInput.startsWith("/")) {
-            const cidrValue = parseInt(cidrInput.slice(1), 10);
-            if (isNaN(cidrValue) || cidrValue < 0 || cidrValue > 32) {
-                e.preventDefault();
-                alert("CIDR must be between /0 and /32.");
-            }
-        }
-    });
-</script>
-<script>
     document.addEventListener('DOMContentLoaded', function () {
-        const ipInput = document.getElementById('ipAddress');
-        const cidrInput = document.getElementById('cidrOrMask');
+        // Use shared validation from site.js
+        attachValidation('ipAddress', 'cidrOrMask');
 
-        function validateIp(ip) {
-            const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-            return ipv4Regex.test(ip);
-        }
-
-        function validateCidr(cidr) {
-            if (cidr.startsWith('/')) {
-                const val = parseInt(cidr.substring(1));
-                return !isNaN(val) && val >= 0 && val <= 32;
+        // Form submission check
+        document.querySelector("form").addEventListener("submit", function (e) {
+            const ipInput = document.getElementById("ipAddress");
+            const cidrInput = document.getElementById("cidrOrMask");
+            
+            if (!validateIPv4(ipInput.value)) {
+                e.preventDefault();
+                ipInput.classList.add('is-invalid');
             }
-            // Simple check for dotted decimal mask (basic format)
-            const maskRegex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-            return maskRegex.test(cidr);
-        }
-
-        function updateValidation(input, isValid) {
-            if (input.value.trim() === '') {
-                input.classList.remove('is-valid', 'is-invalid');
-                return;
+            if (!validateCIDR(cidrInput.value)) {
+                e.preventDefault();
+                cidrInput.classList.add('is-invalid');
             }
-            if (isValid) {
-                input.classList.remove('is-invalid');
-                input.classList.add('is-valid');
-            } else {
-                input.classList.remove('is-valid');
-                input.classList.add('is-invalid');
-            }
-        }
-
-        ipInput.addEventListener('input', function() {
-            updateValidation(this, validateIp(this.value));
-        });
-
-        cidrInput.addEventListener('input', function() {
-            updateValidation(this, validateCidr(this.value));
         });
 
         // History Logic
