@@ -88,11 +88,24 @@
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="button" class="btn btn-primary" id="generateBtn">Generate ACL</button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary flex-grow-1" id="generateBtn">Generate ACL</button>
+                            <button type="button" class="btn btn-outline-info" onclick="toggleHelp()">Need Help?</button>
                         </div>
                     </form>
                 </div>
+            </div>
+
+            <!-- Help panel (initially hidden) -->
+            <div class="acl-help alert alert-secondary mt-4 mb-0" style="display: none;">
+                <p><strong>How to use this tool:</strong></p>
+                <ul>
+                    <li><strong>Vendor & Type:</strong> Choose between Cisco IOS or Juniper Junos, and the ACL type (Standard/Extended).</li>
+                    <li><strong>Action & Protocol:</strong> Select whether to Permit or Deny traffic, and the protocol (IP, TCP, UDP, ICMP).</li>
+                    <li><strong>Source & Destination:</strong> Enter IP addresses and CIDR masks (e.g., /24). Ports are optional for TCP/UDP.</li>
+                    <li>Click <span class="badge bg-primary">Generate ACL</span> to create the configuration.</li>
+                    <li>Copy the result using the "Copy to Clipboard" button.</li>
+                </ul>
             </div>
 
             <!-- Output -->
@@ -110,5 +123,11 @@
 </div>
 
 @section Scripts {
+    <script>
+        function toggleHelp() {
+            const panel = document.querySelector('.acl-help');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
     <script src="~/js/aclGenerator.js"></script>
 }
