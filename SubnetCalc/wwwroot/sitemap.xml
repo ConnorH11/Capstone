@@ -9,47 +9,52 @@
 
 <url>
   <loc>https://subnetsuite.com/</loc>
-  <lastmod>2025-05-24T18:55:10+00:00</lastmod>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
   <loc>https://subnetsuite.com/IPSubnet</loc>
-  <lastmod>2025-05-24T18:55:10+00:00</lastmod>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://subnetsuite.com/VLSM</loc>
-  <lastmod>2025-05-24T18:55:10+00:00</lastmod>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://subnetsuite.com/supernetting</loc>
-  <lastmod>2025-05-24T18:55:10+00:00</lastmod>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://subnetsuite.com/about</loc>
-  <lastmod>2025-05-24T18:55:10+00:00</lastmod>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://subnetsuite.com/converter</loc>
-  <lastmod>2025-05-24T18:55:10+00:00</lastmod>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://subnetsuite.com/Visualizer</loc>
-  <lastmod>2025-05-24T18:55:10+00:00</lastmod>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://subnetsuite.com/IPv6</loc>
-  <lastmod>2025-05-24T18:55:10+00:00</lastmod>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://subnetsuite.com/BinaryCalc</loc>
-  <lastmod>2025-05-24T18:55:10+00:00</lastmod>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://subnetsuite.com/ACLGenerator</loc>
+  <lastmod>2025-11-22T19:19:08+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 
