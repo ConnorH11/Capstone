@@ -1,4 +1,4 @@
-// visualizer.js
+﻿// visualizer.js
 let deleteMode = false;
 let cableMode = false;
 let cableStart = null;
@@ -639,8 +639,15 @@ document.getElementById("addTextBtn").addEventListener("click", () => {
     const textbox = document.createElement("div");
     textbox.className = "custom-textbox draggable-textbox";
     textbox.contentEditable = "true"; textbox.innerText = "Editable Text";
-    textbox.style.position = "absolute"; const canvasRect = canvas.getBoundingClientRect();
-    textbox.style.left = `${canvasRect.width / 2 - 50}px`; textbox.style.top = `${canvasRect.height / 2 - 20}px`;
+    textbox.style.position = "absolute";
+
+    const wrapper = document.querySelector(".canvas-wrapper");
+    const centerX = wrapper.scrollLeft + (wrapper.clientWidth / 2);
+    const centerY = wrapper.scrollTop + (wrapper.clientHeight / 2);
+
+    textbox.style.left = `${centerX - 50}px`;
+    textbox.style.top = `${centerY - 20}px`;
+
     textbox.style.padding = "5px"; textbox.style.border = "1px dashed #ccc";
     textbox.style.backgroundColor = "rgba(255, 255, 255, 0.8)"; textbox.style.cursor = "move";
     textbox.style.zIndex = "5"; textbox.style.minWidth = "50px"; textbox.style.minHeight = "20px";
@@ -705,3 +712,266 @@ canvas.addEventListener('drop', e => {
     };
     makeDraggable(node, label, devices[id]);
 });
+
+// --- Canvas Resizing Logic ---
+document.getElementById("resizeWidthBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    const wrapper = document.querySelector(".canvas-wrapper");
+    const currentWidth = wrapper.scrollWidth;
+    wrapper.style.width = `${currentWidth + 500}px`;
+    const canvasArea = document.getElementById("canvas");
+    const currentCanvasWidth = parseInt(canvasArea.style.minWidth) || 100;
+    canvasArea.style.minWidth = `${currentCanvasWidth + 50}0%`;
+    canvasArea.style.width = `${canvasArea.offsetWidth + 500}px`;
+    document.getElementById("connectionLayer").style.width = canvasArea.style.width;
+});
+document.getElementById("resizeHeightBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    const wrapper = document.querySelector(".canvas-wrapper");
+    const currentHeight = parseInt(wrapper.style.height) || 1000;
+    wrapper.style.height = `${currentHeight + 500}px`;
+});
+
+// --- Export PNG Logic ---
+document.getElementById("exportPngBtn").addEventListener("click", async () => {
+    // 1. Create a temporary container for export
+    const exportContainer = document.createElement('div');
+    exportContainer.style.position = 'absolute';
+    exportContainer.style.top = '-9999px';
+    exportContainer.style.left = '-9999px';
+    exportContainer.style.backgroundColor = '#ffffff';
+    exportContainer.style.padding = '20px';
+    exportContainer.style.zIndex = '-1';
+    exportContainer.style.width = 'auto';
+    exportContainer.style.height = 'auto';
+    document.body.appendChild(exportContainer);
+
+    // 2. Clone Subnet Results (if visible)
+    const resultsDiv = document.getElementById("subnetResults");
+    if (resultsDiv && resultsDiv.style.display !== 'none') {
+        const clonedResults = resultsDiv.cloneNode(true);
+        clonedResults.style.marginBottom = '20px';
+        clonedResults.style.display = 'block';
+        const csvBtn = clonedResults.querySelector('#exportCsvBtn');
+        if (csvBtn) csvBtn.remove();
+        exportContainer.appendChild(clonedResults);
+    }
+
+    // 3. Clone Canvas Wrapper
+    const originalWrapper = document.querySelector(".canvas-wrapper");
+    const clonedWrapper = originalWrapper.cloneNode(true);
+
+    // Fix styles for export
+    clonedWrapper.style.overflow = 'visible';
+    clonedWrapper.style.height = 'auto';
+    clonedWrapper.style.width = 'auto';
+    clonedWrapper.style.position = 'relative';
+    clonedWrapper.style.border = '1px solid #ccc';
+    clonedWrapper.style.minWidth = `${originalWrapper.scrollWidth}px`;
+    clonedWrapper.style.minHeight = `${originalWrapper.scrollHeight}px`;
+
+    exportContainer.appendChild(clonedWrapper);
+
+    // 4. Pre-process images: Rasterize SVGs to PNG Data URIs
+    const images = clonedWrapper.querySelectorAll('img');
+    const imagePromises = Array.from(images).map(img => {
+        return new Promise((resolve) => {
+            if (!img.src || !img.src.endsWith('.svg')) {
+                resolve();
+                return;
+            }
+
+            const tempImg = new Image();
+            tempImg.crossOrigin = "Anonymous";
+            tempImg.onload = function () {
+                const canvas = document.createElement('canvas');
+                canvas.width = parseInt(img.style.width) || tempImg.naturalWidth || 50;
+                canvas.height = parseInt(img.style.height) || tempImg.naturalHeight || 50;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
+
+                try {
+                    img.src = canvas.toDataURL('image/png');
+                    resolve();
+                } catch (e) {
+                    console.warn("Canvas taint issue, falling back to original src", e);
+                    resolve();
+                }
+            };
+            tempImg.onerror = function () {
+                console.warn("Failed to load SVG for rasterization:", img.src);
+                resolve();
+            };
+            tempImg.src = img.src + "?t=" + new Date().getTime();
+        });
+    });
+
+    try {
+        await Promise.all(imagePromises);
+
+        // 5. Capture with html2canvas
+        html2canvas(exportContainer, {
+            backgroundColor: "#ffffff",
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            scale: 2
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'network_topology_report.png';
+            link.href = canvas.toDataURL();
+            link.click();
+            document.body.removeChild(exportContainer);
+        }).catch(err => {
+            console.error("Export failed:", err);
+            alert("Failed to export PNG. See console for details.");
+            if (document.body.contains(exportContainer)) {
+                document.body.removeChild(exportContainer);
+            }
+        });
+    } catch (err) {
+        console.error("Image processing failed:", err);
+        alert("Failed to process images for export.");
+        if (document.body.contains(exportContainer)) {
+            document.body.removeChild(exportContainer);
+        }
+    }
+});
+
+// --- Save/Load State Logic ---
+
+document.getElementById("saveStateBtn").addEventListener("click", () => {
+    const state = {
+        deviceCounter: deviceCounter,
+        devices: Object.values(devices).map(d => ({
+            id: d.id,
+            type: d.type,
+            left: d.element.style.left,
+            top: d.element.style.top,
+            customName: d.customName,
+            connections: d.connections
+        })),
+        connections: connections.map(c => ({
+            fromId: c.fromDevice.id,
+            toId: c.toDevice.id
+        }))
+    };
+
+    const json = JSON.stringify(state, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "network_topology.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});
+
+document.getElementById("loadStateBtn").addEventListener("click", () => {
+    document.getElementById("loadStateInput").click();
+});
+
+document.getElementById("loadStateInput").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const state = JSON.parse(event.target.result);
+            loadState(state);
+        } catch (err) {
+            console.error("Load failed:", err);
+            alert("Failed to load state. Invalid JSON file.");
+        }
+        e.target.value = '';
+    };
+    reader.readAsText(file);
+});
+
+function loadState(state) {
+    document.getElementById("clearCanvasBtn").click();
+    deviceCounter = state.deviceCounter || 0;
+
+    if (state.devices) {
+        state.devices.forEach(d => {
+            const iconSrc = getIconSrcByType(d.type);
+            if (!iconSrc) return;
+
+            const node = document.createElement('img');
+            node.src = iconSrc;
+            node.className = 'draggable-device device-icon';
+            node.style.position = 'absolute';
+            node.style.zIndex = "2";
+            node.style.width = "50px"; node.style.height = "50px";
+            node.style.left = d.left;
+            node.style.top = d.top;
+            node.dataset.id = d.id;
+            node.dataset.type = d.type;
+
+            const label = document.createElement('div');
+            label.innerText = d.customName || `${d.type} ?`;
+            label.className = 'device-label';
+            label.contentEditable = "plaintext-only";
+            label.title = "Click to rename";
+            label.style.position = 'absolute';
+            label.style.textAlign = 'center';
+            label.style.width = '80px';
+            label.style.height = '15px';
+            const iconLeft = parseInt(d.left);
+            const iconTop = parseInt(d.top);
+            label.style.left = `${iconLeft + 25 - 40}px`;
+            label.style.top = `${iconTop + 50 + 5}px`;
+            label.style.zIndex = "3";
+
+            label.addEventListener('blur', () => { if (devices[d.id]) devices[d.id].customName = label.innerText; });
+
+            canvas.appendChild(node);
+            canvas.appendChild(label);
+
+            devices[d.id] = {
+                id: d.id,
+                type: d.type,
+                element: node,
+                labelElement: label,
+                connections: [],
+                ipAddress: null,
+                ipAddressElement: null,
+                interfaceIPs: {},
+                interfaceLabels: {},
+                customName: d.customName
+            };
+
+            makeDraggable(node, label, devices[d.id]);
+        });
+    }
+
+    if (state.connections) {
+        state.connections.forEach(c => {
+            const fromDevice = devices[c.fromId];
+            const toDevice = devices[c.toId];
+            if (fromDevice && toDevice) {
+                drawSvgLine(fromDevice.element, toDevice.element);
+            }
+        });
+    }
+}
+
+function getIconSrcByType(type) {
+    const typeLower = type.toLowerCase();
+    switch (typeLower) {
+        case 'router': return '/icons/router.svg';
+        case 'switch': return '/icons/switch.svg';
+        case 'pc': return '/icons/pc.svg';
+        case 'firewall': return '/icons/firewall.svg';
+        case 'laptop': return '/icons/laptop.svg';
+        case 'l3switch': return '/icons/L3switch.svg';
+        case 'phone': return '/icons/phone.svg';
+        case 'printer': return '/icons/printer.svg';
+        case 'server': return '/icons/server.svg';
+        default: return '/icons/router.svg';
+    }
+}

@@ -24,6 +24,26 @@
                     <button id="cableModeBtn" class="btn btn-outline-primary">Cable Mode</button>
                     <span id="cableStatus" class="text-primary ms-2" style="display:none;">Cable Mode Active</span>
                     <button id="clearCanvasBtn" class="btn btn-outline-secondary">Clear Canvas</button>
+                    
+                    <div class="vr mx-2"></div>
+                    
+                    <!-- Resize Controls -->
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            Resize Canvas
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="resizeWidthBtn">Add Width (+500px)</a></li>
+                            <li><a class="dropdown-item" href="#" id="resizeHeightBtn">Add Height (+500px)</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Import/Export Controls -->
+                    <button id="saveStateBtn" class="btn btn-outline-success" title="Save Topology to JSON">Save</button>
+                    <button id="loadStateBtn" class="btn btn-outline-warning" title="Load Topology from JSON">Load</button>
+                    <input type="file" id="loadStateInput" accept=".json" style="display: none;" />
+                    <button id="exportPngBtn" class="btn btn-outline-info" title="Export as PNG Image">Export PNG</button>
+
                     <button type="button" class="btn btn-outline-info ms-auto" onclick="toggleHelp()">Need Help?</button>
                 </div>
             </div>
@@ -104,7 +124,8 @@
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
         }
     </script>
-    <script src="~/js/visualizer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="~/js/visualizer.js" asp-append-version="true"></script>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-7CMQXDK64Z"></script>

@@ -1,17 +1,19 @@
 .canvas-wrapper {
     position: relative;
     width: 100%;
-    height: 1000px;
+    height: 1000px; /* Initial height */
     border: 2px dashed #ccc;
-    overflow: auto;
+    overflow: auto; /* Enable scrolling if content grows */
+    background-color: #ffffff; /* Ensure white background for PNG export */
 }
 
 .canvas-area {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    /* Allow width/height to grow beyond 100% of wrapper if needed */
+    min-width: 100%;
+    min-height: 100%;
     z-index: 2;
 }
 

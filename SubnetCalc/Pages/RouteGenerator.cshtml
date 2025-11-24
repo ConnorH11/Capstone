@@ -1,0 +1,192 @@
+@page
+@model SubnetCalc.Pages.RouteGeneratorModel
+@{
+    ViewData["Title"] = "Route Generator";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Route Generator</h2>
+    <p class="text-center text-muted">Generate Cisco IOS and Juniper Junos routing configurations.</p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="routeForm">
+                        <!-- Vendor & Protocol -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="vendor" class="form-label">Vendor</label>
+                                <select class="form-select" id="vendor">
+                                    <option value="cisco">Cisco IOS</option>
+                                    <option value="juniper">Juniper Junos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="protocol" class="form-label">Protocol</label>
+                                <select class="form-select" id="protocol">
+                                    <option value="static">Static Route</option>
+                                    <option value="ospf">OSPF</option>
+                                    <option value="bgp">BGP</option>
+                                    <option value="rip">RIP</option>
+                                    <option value="eigrp">EIGRP (Cisco Only)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <!-- Static Route Fields -->
+                        <div id="staticFields" class="protocol-fields">
+                            <h5>Static Route Details</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-5">
+                                    <label for="staticDestIp" class="form-label">Destination Network</label>
+                                    <input type="text" class="form-control" id="staticDestIp" placeholder="e.g. 192.168.2.0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="staticMask" class="form-label">Mask / CIDR</label>
+                                    <input type="text" class="form-control" id="staticMask" placeholder="e.g. 255.255.255.0 or /24">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="staticNextHop" class="form-label">Next Hop IP / Interface</label>
+                                    <input type="text" class="form-control" id="staticNextHop" placeholder="e.g. 10.0.0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OSPF Fields -->
+                        <div id="ospfFields" class="protocol-fields" style="display: none;">
+                            <h5>OSPF Details</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="ospfProcessId" class="form-label">Process ID</label>
+                                    <input type="number" class="form-control" id="ospfProcessId" placeholder="e.g. 1">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="ospfArea" class="form-label">Area ID</label>
+                                    <input type="text" class="form-control" id="ospfArea" placeholder="e.g. 0">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="ospfNetwork" class="form-label">Network Address</label>
+                                    <input type="text" class="form-control" id="ospfNetwork" placeholder="e.g. 10.0.0.0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="ospfWildcard" class="form-label">Wildcard Mask / CIDR</label>
+                                    <input type="text" class="form-control" id="ospfWildcard" placeholder="e.g. 0.255.255.255 or /8">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BGP Fields -->
+                        <div id="bgpFields" class="protocol-fields" style="display: none;">
+                            <h5>BGP Details</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="bgpAsn" class="form-label">Local AS Number</label>
+                                    <input type="number" class="form-control" id="bgpAsn" placeholder="e.g. 65001">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="bgpRouterId" class="form-label">Router ID (Optional)</label>
+                                    <input type="text" class="form-control" id="bgpRouterId" placeholder="e.g. 1.1.1.1">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="bgpNeighborIp" class="form-label">Neighbor IP</label>
+                                    <input type="text" class="form-control" id="bgpNeighborIp" placeholder="e.g. 10.0.0.2">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="bgpRemoteAs" class="form-label">Remote AS</label>
+                                    <input type="number" class="form-control" id="bgpRemoteAs" placeholder="e.g. 65002">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIP Fields -->
+                        <div id="ripFields" class="protocol-fields" style="display: none;">
+                            <h5>RIP Details</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="ripVersion" class="form-label">Version</label>
+                                    <select class="form-select" id="ripVersion">
+                                        <option value="2">Version 2</option>
+                                        <option value="1">Version 1</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="ripNetwork" class="form-label">Network to Advertise</label>
+                                    <input type="text" class="form-control" id="ripNetwork" placeholder="e.g. 192.168.1.0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EIGRP Fields -->
+                        <div id="eigrpFields" class="protocol-fields" style="display: none;">
+                            <h5>EIGRP Details</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="eigrpAsn" class="form-label">AS Number</label>
+                                    <input type="number" class="form-control" id="eigrpAsn" placeholder="e.g. 100">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="eigrpNetwork" class="form-label">Network to Advertise</label>
+                                    <input type="text" class="form-control" id="eigrpNetwork" placeholder="e.g. 10.0.0.0">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label for="eigrpWildcard" class="form-label">Wildcard Mask (Optional)</label>
+                                    <input type="text" class="form-control" id="eigrpWildcard" placeholder="e.g. 0.255.255.255">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary flex-grow-1" id="generateRouteBtn">Generate Config</button>
+                            <button type="button" class="btn btn-outline-info" onclick="toggleRouteHelp()">Need Help?</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help panel (initially hidden) -->
+            <div class="route-help alert alert-secondary mt-4 mb-0" style="display: none;">
+                <p><strong>How to use this tool:</strong></p>
+                <ul>
+                    <li><strong>Vendor:</strong> Select Cisco IOS or Juniper Junos.</li>
+                    <li><strong>Protocol:</strong> Choose the routing protocol you want to configure.</li>
+                    <li><strong>Static:</strong> Enter destination network, mask, and next hop IP.</li>
+                    <li><strong>OSPF:</strong> Enter Process ID, Area, and the network to advertise.</li>
+                    <li><strong>BGP:</strong> Enter your AS number, neighbor IP, and remote AS number.</li>
+                    <li><strong>RIP:</strong> Select version and network.</li>
+                    <li><strong>EIGRP:</strong> Enter AS number and network (Cisco only).</li>
+                    <li>Click <span class="badge bg-primary">Generate Config</span> to see the commands.</li>
+                </ul>
+            </div>
+
+            <!-- Output -->
+            <div class="card mt-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Generated Configuration</h5>
+                    <textarea class="form-control font-monospace" id="routeOutput" rows="6" readonly></textarea>
+                    <button class="btn btn-outline-secondary mt-2" onclick="copyToClipboard(document.getElementById('routeOutput').value, this)">
+                        Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleRouteHelp() {
+            const panel = document.querySelector('.route-help');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+    <script src="~/js/routeGenerator.js"></script>
+}
