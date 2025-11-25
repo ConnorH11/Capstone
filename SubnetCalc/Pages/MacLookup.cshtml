@@ -1,0 +1,72 @@
+@page
+@model SubnetCalc.Pages.MacLookupModel
+@{
+    ViewData["Title"] = "MAC Address Vendor Lookup";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">MAC Address Vendor Lookup</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Input Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="MacAddress" class="form-label">MAC Address</label>
+                            <input asp-for="MacAddress" class="form-control" placeholder="e.g. 00:00:0c:00:00:00 or 00-00-0c-00-00-00" />
+                            <div class="form-text">Supports :, -, or . delimiters.</div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">Lookup Vendor</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results -->
+            @if (Model.SearchPerformed)
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">Result</h4>
+                        
+                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                @Model.ErrorMessage
+                            </div>
+                        }
+                        else if (Model.LookupResult != null)
+                        {
+                            <div class="alert alert-success">
+                                <h4 class="alert-heading">@Model.LookupResult.Company</h4>
+                                <hr>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-3">OUI Prefix</dt>
+                                    <dd class="col-sm-9">@Model.LookupResult.MacPrefix</dd>
+
+                                    <dt class="col-sm-3">Address</dt>
+                                    <dd class="col-sm-9">@Model.LookupResult.Address</dd>
+
+                                    <dt class="col-sm-3">Last Updated</dt>
+                                    <dd class="col-sm-9">@Model.LookupResult.Updated</dd>
+                                </dl>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            
+            <!-- Help Section -->
+            <div class="alert alert-secondary">
+                <h5>About this tool</h5>
+                <p>
+                    This tool uses the <a href="https://maclookup.app" target="_blank">MacLookup API</a> to identify the manufacturer of a network device based on its MAC address (OUI).
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

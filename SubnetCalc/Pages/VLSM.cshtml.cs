@@ -8,10 +8,10 @@ namespace SubnetCalc.Pages
     public class VLSMModel : PageModel
     {
         [BindProperty]
-        public string BaseNetwork { get; set; }
+        public string? BaseNetwork { get; set; }
 
         [BindProperty]
-        public string BaseCidr { get; set; }
+        public string? BaseCidr { get; set; }
 
         [BindProperty]
         public string InputMode { get; set; } = "hosts";
@@ -25,7 +25,7 @@ namespace SubnetCalc.Pages
         [BindProperty]
         public List<string> SubnetLabels { get; set; } = new();
 
-        public List<SubnetResult> Results { get; set; }
+        public List<SubnetResult>? Results { get; set; }
 
         public IActionResult OnPost()
         {
