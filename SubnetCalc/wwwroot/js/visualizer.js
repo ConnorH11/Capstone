@@ -348,8 +348,7 @@ function autoSubnet(baseCidrStr, groups) {
         const bDevs = b.map(id => devices[id]).filter(Boolean);
         const aIsP2P = aDevs.length === 2 && aDevs.every(d => d.type.toLowerCase() === 'router' || d.type.toLowerCase() === 'l3switch');
         const bIsP2P = bDevs.length === 2 && bDevs.every(d => d.type.toLowerCase() === 'router' || d.type.toLowerCase() === 'l3switch');
-        if (aIsP2P && !bIsP2P) return -1;
-        if (!aIsP2P && bIsP2P) return 1;
+
         // Switches now count toward host requirement for sorting
         const hostsA = aDevs.length + (aDevs.some(d => d.type.toLowerCase() === 'router' || d.type.toLowerCase() === 'l3switch') && aDevs.length > 0 ? 1 : 0) - (aIsP2P ? 1 : 0);
         const hostsB = bDevs.length + (bDevs.some(d => d.type.toLowerCase() === 'router' || d.type.toLowerCase() === 'l3switch') && bDevs.length > 0 ? 1 : 0) - (bIsP2P ? 1 : 0);

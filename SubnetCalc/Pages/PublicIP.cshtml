@@ -1,0 +1,160 @@
+@page
+@model SubnetCalc.Pages.PublicIPModel
+@{
+    ViewData["Title"] = "Public IP & Privacy Check";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Public IP & Privacy Check</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Public IP Info Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Public Identity</h5>
+                </div>
+                <div class="card-body">
+                    <div id="loading" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Scanning network identity...</p>
+                    </div>
+
+                    <div id="results" style="display:none;">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="fw-bold text-muted">Public IP Address</label>
+                                <h3 id="ipAddress" class="text-primary">---</h3>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="fw-bold text-muted">Internet Service Provider (ISP)</label>
+                                <h5 id="ispName">---</h5>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="fw-bold text-muted">City</label>
+                                <p id="city">---</p>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="fw-bold text-muted">Region</label>
+                                <p id="region">---</p>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="fw-bold text-muted">Country</label>
+                                <p id="country">---</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="error" class="alert alert-danger" style="display:none;">
+                        Could not retrieve IP information. Ad blockers or privacy extensions might be blocking the request.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy & Leaks Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Privacy & Leaks</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="fw-bold">WebRTC Leak Check</label>
+                        <div id="webrtcResult" class="alert alert-secondary mt-2">
+                            Checking for local IP leaks...
+                        </div>
+                        <small class="text-muted">WebRTC can sometimes leak your local LAN IP address even when using a VPN.</small>
+                    </div>
+                    <hr />
+                    <div class="mb-3">
+                        <label class="fw-bold">User Agent</label>
+                        <div class="p-2 bg-light border rounded font-monospace text-break" id="userAgent">
+                            ---
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="alert alert-info">
+                <h5>About this tool</h5>
+                <p>
+                    This tool runs entirely in your browser to show you what information websites can see about you.
+                </p>
+                <ul>
+                    <li><strong>Public IP:</strong> The address websites use to send data back to you.</li>
+                    <li><strong>ISP:</strong> The company providing your internet connection.</li>
+                    <li><strong>WebRTC Leak:</strong> Checks if your browser reveals your local network IP address via WebRTC functionality.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Fetch Public IP Info
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+
+                document.getElementById('ipAddress').innerText = data.ip || 'Unknown';
+                document.getElementById('ispName').innerText = data.org || data.asn || 'Unknown';
+                document.getElementById('city').innerText = data.city || 'Unknown';
+                document.getElementById('region').innerText = data.region || 'Unknown';
+                document.getElementById('country').innerText = data.country_name || 'Unknown';
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            });
+
+        // 2. Set User Agent
+        document.getElementById('userAgent').innerText = navigator.userAgent;
+
+        // 3. WebRTC Leak Test
+        checkWebRTC();
+    });
+
+    function checkWebRTC() {
+        const webrtcResult = document.getElementById('webrtcResult');
+        const rtc = new RTCPeerConnection({ iceServers: [] });
+        rtc.createDataChannel('');
+        
+        rtc.onicecandidate = (e) => {
+            if (!e.candidate) return;
+            const candidate = e.candidate.candidate;
+            // Look for IP addresses in the candidate string
+            const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
+            const match = candidate.match(ipRegex);
+            if (match) {
+                const ip = match[1];
+                // Ignore public IPs if they match what we found earlier (simplified check)
+                // We are mostly looking for local IPs like 192.168.x.x or 10.x.x.x
+                if (ip.startsWith('192.168.') || ip.startsWith('10.') || (ip.startsWith('172.') && parseInt(ip.split('.')[1]) >= 16 && parseInt(ip.split('.')[1]) <= 31)) {
+                     webrtcResult.className = 'alert alert-warning mt-2';
+                     webrtcResult.innerHTML = `<strong>Potential Leak Detected!</strong><br>Your browser is exposing a local IP address: <code>${ip}</code>`;
+                     rtc.close();
+                     return;
+                }
+            }
+        };
+
+        rtc.createOffer().then(offer => rtc.setLocalDescription(offer));
+        
+        // Timeout if no leak found
+        setTimeout(() => {
+            if (webrtcResult.className.includes('alert-secondary')) {
+                webrtcResult.className = 'alert alert-success mt-2';
+                webrtcResult.innerHTML = '<strong>No Local IP Leak Detected.</strong><br>WebRTC did not reveal any local LAN addresses.';
+            }
+            rtc.close();
+        }, 3000);
+    }
+</script>

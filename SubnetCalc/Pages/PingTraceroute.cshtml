@@ -1,0 +1,77 @@
+@page
+@model SubnetCalc.Pages.PingTracerouteModel
+@{
+    ViewData["Title"] = "Ping / Traceroute";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Ping / Traceroute Tool</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Input Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="HostnameOrIp" class="form-label">Hostname or IP Address</label>
+                            <input asp-for="HostnameOrIp" class="form-control" placeholder="e.g. google.com or 8.8.8.8" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tool</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="ToolType" value="Ping" id="radioPing" checked>
+                                <label class="form-check-label" for="radioPing">
+                                    Ping
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="ToolType" value="Traceroute" id="radioTraceroute">
+                                <label class="form-check-label" for="radioTraceroute">
+                                    Traceroute
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary" disabled="@(Model.IsRunning ? "disabled" : null)">
+                                @(Model.IsRunning ? "Running..." : "Run")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Console -->
+            @if (Model.OutputLog != null && Model.OutputLog.Count > 0)
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white">
+                        Output
+                    </div>
+                    <div class="card-body bg-light font-monospace" style="max-height: 400px; overflow-y: auto; font-size: 0.9rem;">
+                        @foreach (var line in Model.OutputLog)
+                        {
+                            <div>@line</div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Help Section -->
+            <div class="alert alert-secondary">
+                <h5>About this tool</h5>
+                <p>
+                    <strong>Ping:</strong> Sends ICMP Echo Request messages to verify connectivity to a target host.
+                </p>
+                <p>
+                    <strong>Traceroute:</strong> Traces the path packets take to a destination by manipulating the Time-To-Live (TTL) field.
+                </p>
+                <p class="mb-0">
+                    <small>Note: This tool runs from the server side. Results reflect connectivity from the server, not your local machine.</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
