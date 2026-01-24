@@ -19,8 +19,8 @@ jobs:
           git pull origin main
 
           # Stop the SubnetSuite Windows Service if running
-          if (Get-Service -Name "SubnetSuite2" -ErrorAction SilentlyContinue) {
-            Stop-Service -Name "SubnetSuite2" -Force
+          if (Get-Service -Name "SubnetSuite" -ErrorAction SilentlyContinue) {
+            Stop-Service -Name "SubnetSuite" -Force
             Start-Sleep -Seconds 3
           }
 
@@ -30,4 +30,4 @@ jobs:
       - name: Restart SubnetSuite service
         shell: powershell
         run: |
-          Start-Service -Name "SubnetSuite2"
+          Start-Service -Name "SubnetSuite"
