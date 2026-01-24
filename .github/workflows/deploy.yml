@@ -11,7 +11,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-
+      - name: Mark directory as safe
+        run: git config --global --add safe.directory "C:/Users/Administrator/Capstone"
       - name: Pull latest changes and publish .NET app
         shell: powershell
         run: |
